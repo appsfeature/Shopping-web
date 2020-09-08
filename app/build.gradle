@@ -1,0 +1,67 @@
+apply plugin: 'com.android.application'
+
+android {
+    flavorDimensions "default"
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+
+    defaultConfig {
+        applicationId "com.appsfeature.shoppingsample"
+        minSdkVersion 16
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+    }
+    productFlavors {
+        shoppingsample {
+            applicationId "com.appsfeature.shoppingsample"
+            versionCode 1
+            versionName "1.0"
+        }
+    }
+    signingConfigs {
+        shoppingsample {
+            storeFile file("../keystore/shoppingsample.jks")
+            storePassword "shoppingsample"
+            keyAlias "shoppingsample"
+            keyPassword "shoppingsample"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            productFlavors.shoppingsample.signingConfig signingConfigs.shoppingsample
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation "androidx.appcompat:appcompat:$rootProject.ext.appcompat"
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+
+    implementation "org.bitbucket.android-dennislabs:helper:$rootProject.ext.helper"
+
+//    implementation 'de.hdodenhof:circleimageview:3.1.0'
+    implementation "com.crashlytics.sdk.android:crashlytics:$rootProject.ext.firebase_crashlytics_version"
+//    implementation project(path: ':login')
+
+//    implementation 'gun0912.ted:tedpermission:2.2.3'
+    implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
+
+}
