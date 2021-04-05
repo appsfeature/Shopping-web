@@ -4,8 +4,6 @@ import android.app.Application;
 
 import androidx.lifecycle.ViewModelProvider;
 
-import com.helper.util.DayNightPreference;
-
 public class AppApplication extends Application {
 
 
@@ -24,7 +22,6 @@ public class AppApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        DayNightPreference.setNightMode(this, false);
         instance = this;
     }
 

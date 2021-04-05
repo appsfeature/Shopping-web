@@ -24,22 +24,19 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.appsfeature.bizwiz.R;
 import com.appsfeature.bizwiz.util.AppConstant;
-import com.helper.util.BaseConstants;
-import com.helper.util.BaseUtil;
-import com.helper.util.SocialUtil;
+import com.appsfeature.bizwiz.util.SupportUtil;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 
 public class BrowserActivity extends BaseToolbarActivity {
 
-    private String TAG = "BrowserActivity";
+    private static final String TAG = "BrowserActivity";
     private String url;
     public ProgressBar progressBar;
     public RelativeLayout container;
     public WebView webView;
     private String title;
     private boolean isRemoveHeaderFooter = false;
-    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +50,8 @@ public class BrowserActivity extends BaseToolbarActivity {
                 getSupportActionBar().setTitle(title);
             }
         }
-        BaseUtil.loadBanner(findViewById(R.id.rlBannerAds), this);
-        toolbar = findViewById(R.id.toolbar);
+        SupportUtil.loadBanner(findViewById(R.id.rlBannerAds), this);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setUpToolBar(toolbar, title);
     }
 
@@ -81,17 +78,17 @@ public class BrowserActivity extends BaseToolbarActivity {
         container = findViewById(R.id.container);
         Intent intent = getIntent();
 
-        if (intent.hasExtra(BaseConstants.WEB_VIEW_URL)) {
-            url = intent.getStringExtra(BaseConstants.WEB_VIEW_URL);
+        if (intent.hasExtra(AppConstant.WEB_VIEW_URL)) {
+            url = intent.getStringExtra(AppConstant.WEB_VIEW_URL);
         }
-        if (intent.hasExtra(BaseConstants.TITLE)) {
-            title = intent.getStringExtra(BaseConstants.TITLE);
+        if (intent.hasExtra(AppConstant.TITLE)) {
+            title = intent.getStringExtra(AppConstant.TITLE);
         }
         if (intent.hasExtra(AppConstant.IS_REMOVE_HEADER_FOOTER)) {
             isRemoveHeaderFooter = intent.getBooleanExtra(AppConstant.IS_REMOVE_HEADER_FOOTER, false);
         }
         if (TextUtils.isEmpty(url)) {
-            BaseUtil.showToast(this, "Invalid Url");
+            SupportUtil.showToast(this, "Invalid Url");
             finish();
             return;
         }
@@ -125,46 +122,7 @@ public class BrowserActivity extends BaseToolbarActivity {
                 super.shouldOverrideUrlLoading(view, request);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     String requestUrl = request.getUrl().toString();
-                    if (url.startsWith("tel:")) {
-                        try {
-                            Intent intent = new Intent(Intent.ACTION_DIAL,
-                                    Uri.parse(url));
-                            startActivity(intent);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            BaseUtil.showToast(BrowserActivity.this, e.getMessage());
-                        }
-                        return false;
-                    }
-                    if(url.contains("geo:") || url.contains("google.com/maps/")) {
-                        try {
-                            Uri gmmIntentUri = Uri.parse(url);
-                            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-                            mapIntent.setPackage("com.google.android.apps.maps");
-                            if (mapIntent.resolveActivity(getPackageManager()) != null) {
-                                startActivity(mapIntent);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            BaseUtil.showToast(BrowserActivity.this, e.getMessage());
-                        }
-                        return false;
-                    }
-                    if (request.getUrl().toString().endsWith("viewer.action=download")) {
-                        Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setData(Uri.parse(requestUrl));
-                        startActivity(i);
-                        return false;
-                    }
-                    if (isUrlIntentType(request.getUrl().toString())) {
-                        SocialUtil.openIntentUrl(BrowserActivity.this, request.getUrl().toString());
-                        webView.stopLoading();
-                        progressBar.setVisibility(View.GONE);
-                        webView.goBack();
-                        return false;
-                    }
-                    view.loadUrl(request.getUrl().toString());
-                    return true;
+                    return filterUrl(view, requestUrl);
                 }
                 return false;
             }
@@ -173,24 +131,57 @@ public class BrowserActivity extends BaseToolbarActivity {
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 super.shouldOverrideUrlLoading(view, url);
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                    if (url.endsWith("viewer.action=download")) {
-                        Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setData(Uri.parse(url));
-                        startActivity(i);
-                        return false;
-                    }
-
-                    if (isUrlIntentType(url)) {
-                        SocialUtil.openIntentUrl(BrowserActivity.this, url);
-                        progressBar.setVisibility(View.GONE);
-                        webView.stopLoading();
-                        webView.goBack();
-                        return false;
-                    }
-                    view.loadUrl(url);
-                    return true;
+                    return filterUrl(view, url);
                 }
                 return false;
+            }
+
+            private boolean filterUrl(WebView view, String url) {
+                if (url.startsWith("tel:")) {
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_DIAL,
+                                Uri.parse(url));
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        SupportUtil.showToast(BrowserActivity.this, e.getMessage());
+                    }
+                    return true;
+                }
+                if(url.contains("geo:") || url.contains("google.com/maps/")) {
+                    try {
+                        Uri gmmIntentUri = Uri.parse(url);
+                        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                        mapIntent.setPackage("com.google.android.apps.maps");
+                        if (mapIntent.resolveActivity(getPackageManager()) != null) {
+                            startActivity(mapIntent);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        SupportUtil.showToast(BrowserActivity.this, e.getMessage());
+                    }
+                    return true;
+                }
+                if (url.endsWith("viewer.action=download")) {
+                    Intent i = new Intent(Intent.ACTION_VIEW);
+                    i.setData(Uri.parse(url));
+                    startActivity(i);
+                    return true;
+                }
+
+                if (isUrlIntentType(url) || isUrlWhatsAppType(url) || isUrlTelegramType(url) || isUrlFbMessengerType(url)) {
+                    SupportUtil.openIntentUrl(BrowserActivity.this, url);
+                    view.stopLoading();
+                    progressBar.setVisibility(View.GONE);
+                    return true;
+                }
+                if (isUrlFacebookType(url) || isUrlTwitterType(url)) {
+                    SupportUtil.openUrlExternal(BrowserActivity.this, url);
+                    view.stopLoading();
+                    return true;
+                }
+                view.loadUrl(url);
+                return true;
             }
 
             @Override
@@ -255,13 +246,48 @@ public class BrowserActivity extends BaseToolbarActivity {
         }
     }
 
-    private String hideGoogleTranslatorHeaderJavaScript = "document.getElementsByTagName('header')[0].style.display = 'none'";
+    private static final String hideGoogleTranslatorHeaderJavaScript = "document.getElementsByTagName('header')[0].style.display = 'none'";
     //    private String hideGoogleTranslatorHeaderJavaScript = "document.getElementById('home').remove()";
-    private String hideGoogleTranslatorFooterJavaScript = "document.getElementById('footer').remove()";
+    private static final String hideGoogleTranslatorFooterJavaScript = "document.getElementById('footer').remove()";
 
 
     private boolean isUrlIntentType(String url) {
         return url.toLowerCase().startsWith("intent://");
+    }
+
+    /**
+     * @param url https://www.facebook.com/sharer.php?t=
+     */
+    private boolean isUrlFacebookType(String url) {
+        return url.toLowerCase().startsWith("https://www.facebook.com");
+    }
+
+    /**
+     * @param url whatsapp://send?text=
+     */
+    private boolean isUrlWhatsAppType(String url) {
+        return url.toLowerCase().startsWith("whatsapp://");
+    }
+
+    /**
+     * @param url tg:msg_url?url=
+     */
+    private boolean isUrlTelegramType(String url) {
+        return url.toLowerCase().startsWith("tg:msg_url");
+    }
+
+    /**
+     * @param url https://twitter.com/intent/tweet?text=
+     */
+    private boolean isUrlTwitterType(String url) {
+        return url.toLowerCase().startsWith("https://twitter.com");
+    }
+
+    /**
+     * @param url fb-messenger://share/?link=
+     */
+    private boolean isUrlFbMessengerType(String url) {
+        return url.toLowerCase().startsWith("fb-messenger://");
     }
 
     @Override
@@ -323,7 +349,7 @@ public class BrowserActivity extends BaseToolbarActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 CropImage.startPickImageActivity(this);
             } else {
-                BaseUtil.showToast(this, "Cancelling, required permissions are not granted");
+                SupportUtil.showToast(this, "Cancelling, required permissions are not granted");
             }
         }
         if (requestCode == CropImage.PICK_IMAGE_PERMISSIONS_REQUEST_CODE) {
@@ -331,7 +357,7 @@ public class BrowserActivity extends BaseToolbarActivity {
                 // required permissions granted, start crop image activity
                 startCropImageActivity(mCropImageUri);
             } else {
-                BaseUtil.showToast(this, "Cancelling, required permissions are not granted");
+                SupportUtil.showToast(this, "Cancelling, required permissions are not granted");
             }
         }
     }

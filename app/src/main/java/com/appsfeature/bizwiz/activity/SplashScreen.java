@@ -5,11 +5,9 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 
-import com.appsfeature.bizwiz.AppApplication;
 import com.appsfeature.bizwiz.R;
 import com.appsfeature.bizwiz.util.AppConstant;
 import com.appsfeature.bizwiz.util.ClassUtil;
-import com.helper.util.DayNightPreference;
 
 
 public class SplashScreen extends Activity {
@@ -20,9 +18,8 @@ public class SplashScreen extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		DayNightPreference.setNightMode(this, false);
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_splash);
+//		setContentView(R.layout.activity_splash);
 		startMainActivity();
 	}
 

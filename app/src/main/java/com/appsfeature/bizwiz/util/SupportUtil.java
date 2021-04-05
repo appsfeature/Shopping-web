@@ -1,22 +1,24 @@
 package com.appsfeature.bizwiz.util;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
+import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 
-import com.helper.util.BaseUtil;
+import java.net.URISyntaxException;
 
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
-
-public class SupportUtil extends BaseUtil {
+public class SupportUtil  {
 
     public static void hideKeybord(Activity activity) {
         if(activity!=null) {
@@ -36,16 +38,38 @@ public class SupportUtil extends BaseUtil {
     }
 
 
-    public static void showNoDataProgress(View view) {
-        if (view != null) {
-            view.setVisibility(VISIBLE);
-            if (view.findViewById(com.helper.R.id.player_progressbar) != null) {
-                view.findViewById(com.helper.R.id.player_progressbar).setVisibility(VISIBLE);
-            }
-            TextView tvNoData = view.findViewById(com.helper.R.id.tv_no_data);
-            if (tvNoData != null) {
-                tvNoData.setVisibility(GONE);
-            }
+    public static void loadBanner(final RelativeLayout view , Activity activity) {
+
+    }
+
+    public static void showToast(Context context, String message) {
+        showToastCentre(context, message);
+    }
+
+    public static void showToastCentre(Context context, String msg) {
+        Toast toast = Toast.makeText(context, msg, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+    }
+
+    public static void openIntentUrl(Context context, String url) {
+        try {
+            Intent intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+            context.startActivity(intent);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (ActivityNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void openUrlExternal(Activity activity, String url) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            activity.startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
