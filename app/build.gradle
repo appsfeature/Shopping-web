@@ -2,21 +2,19 @@ apply plugin: 'com.android.application'
 
 android {
     flavorDimensions "default"
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion 30
 
     defaultConfig {
         applicationId "com.appsfeature.shoppingsample"
         minSdkVersion 16
-        targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 30
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
     productFlavors {
         shoppingsample {
+            //Change package name according to your need
             applicationId "com.appsfeature.shoppingsample"
             versionCode 1
             versionName "1.0"
