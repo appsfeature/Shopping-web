@@ -23,11 +23,11 @@ import java.net.URISyntaxException;
 
 public class BrowserSdk {
 
-    public static void openAppBrowser(Context context, String title, String webUrl) {
-        openAppBrowser(context, title, webUrl, true);
+    public static void open(Context context, String title, String webUrl) {
+        open(context, title, webUrl, true);
     }
 
-    public static void openAppBrowser(Context context, String title, String webUrl, boolean isRemoveHeaderFooter) {
+    public static void open(Context context, String title, String webUrl, boolean isRemoveHeaderFooter) {
         try {
             Intent intent = new Intent(context, BrowserActivity.class);
             intent.putExtra(BrowserConstant.WEB_VIEW_URL, webUrl);

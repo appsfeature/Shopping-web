@@ -1,4 +1,4 @@
-package com.appsfeature.bizwiz;
+package com.appsfeature.browser;
 
 import org.junit.Test;
 

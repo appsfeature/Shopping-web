@@ -1,11 +1,11 @@
-package com.appsfeature.bizwiz.activity;
+package com.appsfeature.browser.activity;
 
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 
-import com.appsfeature.bizwiz.util.AppConstant;
+import com.appsfeature.browser.util.AppConstant;
 import com.browser.BrowserSdk;
 
 
@@ -26,7 +26,7 @@ public class SplashScreen extends Activity {
 		new Handler().postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				BrowserSdk.openAppBrowser(SplashScreen.this, "Live Tv", AppConstant.BASE_URL, false);
+				BrowserSdk.open(SplashScreen.this, "Live Tv", AppConstant.BASE_URL, false);
 				finish();
 			}
 		},SPLASH_TIME_OUT);
