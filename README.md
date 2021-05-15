@@ -21,6 +21,6 @@ dependencies {
 ```
 #### Usage  
 ```java
-    BrowserSdk.openAppBrowser(this, "Title", AppConstant.REQUEST_URL);
+    BrowserSdk.open(this, "Title", AppConstant.REQUEST_URL);
 ```
  
