@@ -1,2 +1,3 @@
+include ':browser'
 rootProject.name='website-app'
 include ':app'

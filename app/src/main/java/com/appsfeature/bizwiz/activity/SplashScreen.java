@@ -5,9 +5,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 
-import com.appsfeature.bizwiz.R;
 import com.appsfeature.bizwiz.util.AppConstant;
-import com.appsfeature.bizwiz.util.ClassUtil;
+import com.browser.BrowserSdk;
 
 
 public class SplashScreen extends Activity {
@@ -27,7 +26,7 @@ public class SplashScreen extends Activity {
 		new Handler().postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				ClassUtil.openAppBrowser(SplashScreen.this, "", AppConstant.BASE_URL, false);
+				BrowserSdk.openAppBrowser(SplashScreen.this, "Live Tv", AppConstant.BASE_URL, false);
 				finish();
 			}
 		},SPLASH_TIME_OUT);

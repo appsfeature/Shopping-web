@@ -1,4 +1,4 @@
-package com.appsfeature.bizwiz.activity;
+package com.browser.activity;
 
 import android.os.Bundle;
 import android.text.TextUtils;

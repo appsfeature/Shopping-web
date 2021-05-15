@@ -1,4 +1,4 @@
-package com.appsfeature.bizwiz.activity;
+package com.browser.activity;
 
 import android.Manifest;
 import android.app.Activity;
@@ -9,6 +9,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.webkit.ConsoleMessage;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -22,9 +24,11 @@ import android.widget.RelativeLayout;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 
-import com.appsfeature.bizwiz.R;
-import com.appsfeature.bizwiz.util.AppConstant;
-import com.appsfeature.bizwiz.util.SupportUtil;
+import com.browser.BrowserSdk;
+import com.browser.R;
+import com.browser.util.BrowserConstant;
+import com.browser.views.VideoEnabledWebChromeClient;
+import com.browser.views.VideoEnabledWebView;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 
@@ -34,14 +38,16 @@ public class BrowserActivity extends BaseToolbarActivity {
     private String url;
     public ProgressBar progressBar;
     public RelativeLayout container;
-    public WebView webView;
+    public VideoEnabledWebView webView;
     private String title;
     private boolean isRemoveHeaderFooter = false;
+    private VideoEnabledWebChromeClient webChromeClient;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_browser);
+        setContentView(R.layout.browser_activity);
 
         initDataFromIntent();
         if (getSupportActionBar() != null) {
@@ -50,8 +56,8 @@ public class BrowserActivity extends BaseToolbarActivity {
                 getSupportActionBar().setTitle(title);
             }
         }
-        SupportUtil.loadBanner(findViewById(R.id.rlBannerAds), this);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        BrowserSdk.loadBanner(findViewById(R.id.rlBannerAds), this);
+        toolbar = findViewById(R.id.toolbar);
         setUpToolBar(toolbar, title);
     }
 
@@ -78,17 +84,17 @@ public class BrowserActivity extends BaseToolbarActivity {
         container = findViewById(R.id.container);
         Intent intent = getIntent();
 
-        if (intent.hasExtra(AppConstant.WEB_VIEW_URL)) {
-            url = intent.getStringExtra(AppConstant.WEB_VIEW_URL);
+        if (intent.hasExtra(BrowserConstant.WEB_VIEW_URL)) {
+            url = intent.getStringExtra(BrowserConstant.WEB_VIEW_URL);
         }
-        if (intent.hasExtra(AppConstant.TITLE)) {
-            title = intent.getStringExtra(AppConstant.TITLE);
+        if (intent.hasExtra(BrowserConstant.TITLE)) {
+            title = intent.getStringExtra(BrowserConstant.TITLE);
         }
-        if (intent.hasExtra(AppConstant.IS_REMOVE_HEADER_FOOTER)) {
-            isRemoveHeaderFooter = intent.getBooleanExtra(AppConstant.IS_REMOVE_HEADER_FOOTER, false);
+        if (intent.hasExtra(BrowserConstant.IS_REMOVE_HEADER_FOOTER)) {
+            isRemoveHeaderFooter = intent.getBooleanExtra(BrowserConstant.IS_REMOVE_HEADER_FOOTER, false);
         }
         if (TextUtils.isEmpty(url)) {
-            SupportUtil.showToast(this, "Invalid Url");
+            BrowserSdk.showToast(this, "Invalid Url");
             finish();
             return;
         }
@@ -114,6 +120,43 @@ public class BrowserActivity extends BaseToolbarActivity {
                 return false;
             }
         });
+
+        View nonVideoLayout = findViewById(R.id.nonVideoLayout); // Your own view, read class comments
+        ViewGroup videoLayout = (ViewGroup) findViewById(R.id.videoLayout); // Your own view, read class comments
+        //noinspection all
+        View loadingView = getLayoutInflater().inflate(R.layout.view_loading_video, null); // Your own view, read class comments
+        webChromeClient = new VideoEnabledWebChromeClient(nonVideoLayout, videoLayout, loadingView, webView) // See all available constructors...
+        {
+            // Subscribe to standard events, such as onProgressChanged()...
+            @Override
+            public void onProgressChanged(WebView view, int progress) {
+                // Your code...
+            }
+        };
+        webChromeClient.setOnToggledFullscreen(new VideoEnabledWebChromeClient.ToggledFullscreenCallback() {
+            @Override
+            public void toggledFullscreen(boolean fullscreen) {
+                // Your code to handle the full-screen change, for example showing and hiding the title bar. Example:
+                if (fullscreen) {
+                    WindowManager.LayoutParams attrs = getWindow().getAttributes();
+                    attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+                    attrs.flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+                    getWindow().setAttributes(attrs);
+                    //noinspection all
+                    getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
+                    toolbar.setVisibility(View.GONE);
+                } else {
+                    WindowManager.LayoutParams attrs = getWindow().getAttributes();
+                    attrs.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
+                    attrs.flags &= ~WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+                    getWindow().setAttributes(attrs);
+                    //noinspection all
+                    getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+                    toolbar.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+        webView.setWebChromeClient(webChromeClient);
 
         webView.setWebViewClient(new WebViewClient() {
 
@@ -144,11 +187,11 @@ public class BrowserActivity extends BaseToolbarActivity {
                         startActivity(intent);
                     } catch (Exception e) {
                         e.printStackTrace();
-                        SupportUtil.showToast(BrowserActivity.this, e.getMessage());
+                        BrowserSdk.showToast(BrowserActivity.this, e.getMessage());
                     }
                     return true;
                 }
-                if(url.contains("geo:") || url.contains("google.com/maps/")) {
+                if (url.contains("geo:") || url.contains("google.com/maps/")) {
                     try {
                         Uri gmmIntentUri = Uri.parse(url);
                         Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
@@ -158,7 +201,7 @@ public class BrowserActivity extends BaseToolbarActivity {
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
-                        SupportUtil.showToast(BrowserActivity.this, e.getMessage());
+                        BrowserSdk.showToast(BrowserActivity.this, e.getMessage());
                     }
                     return true;
                 }
@@ -170,13 +213,13 @@ public class BrowserActivity extends BaseToolbarActivity {
                 }
 
                 if (isUrlIntentType(url) || isUrlWhatsAppType(url) || isUrlTelegramType(url) || isUrlFbMessengerType(url)) {
-                    SupportUtil.openIntentUrl(BrowserActivity.this, url);
+                    BrowserSdk.openIntentUrl(BrowserActivity.this, url);
                     view.stopLoading();
                     progressBar.setVisibility(View.GONE);
                     return true;
                 }
                 if (isUrlFacebookType(url) || isUrlTwitterType(url)) {
-                    SupportUtil.openUrlExternal(BrowserActivity.this, url);
+                    BrowserSdk.openUrlExternal(BrowserActivity.this, url);
                     view.stopLoading();
                     return true;
                 }
@@ -349,7 +392,7 @@ public class BrowserActivity extends BaseToolbarActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 CropImage.startPickImageActivity(this);
             } else {
-                SupportUtil.showToast(this, "Cancelling, required permissions are not granted");
+                BrowserSdk.showToast(this, "Cancelling, required permissions are not granted");
             }
         }
         if (requestCode == CropImage.PICK_IMAGE_PERMISSIONS_REQUEST_CODE) {
@@ -357,7 +400,7 @@ public class BrowserActivity extends BaseToolbarActivity {
                 // required permissions granted, start crop image activity
                 startCropImageActivity(mCropImageUri);
             } else {
-                SupportUtil.showToast(this, "Cancelling, required permissions are not granted");
+                BrowserSdk.showToast(this, "Cancelling, required permissions are not granted");
             }
         }
     }
