@@ -25,6 +25,22 @@ dependencies {
 ```
 
 # Custom Usage
+#### changes in your AndroidManifest.xml file
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.browser">
+
+    <application>
+	    ...
+	    ...
+        <activity android:name=".YourActivity"
+            android:configChanges="orientation|screenSize"/>
+    </application>
+</manifest>
+
+```
+
 #### changes in your xml file
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
