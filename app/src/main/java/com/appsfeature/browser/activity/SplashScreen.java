@@ -2,6 +2,7 @@ package com.appsfeature.browser.activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 
@@ -18,7 +19,6 @@ public class SplashScreen extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-//		setContentView(R.layout.activity_splash);
 		startMainActivity();
 	}
 
@@ -26,7 +26,7 @@ public class SplashScreen extends Activity {
 		new Handler().postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				BrowserSdk.open(SplashScreen.this, "Live Tv", AppConstant.BASE_URL, false);
+				startActivity(new Intent(SplashScreen.this, BrowserCustomActivity.class));
 				finish();
 			}
 		},SPLASH_TIME_OUT);

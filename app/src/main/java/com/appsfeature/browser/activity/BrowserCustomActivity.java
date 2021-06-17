@@ -1,80 +1,21 @@
-## Browser
-  
-## Setup 
-Add this to your project build.gradle
-``` gradle
-allprojects {
-    repositories {
-        maven {
-            url "https://jitpack.io"
-        }
-    }
-}
-```
+package com.appsfeature.browser.activity;
 
-#### Dependency
-[![](https://jitpack.io/v/appsfeature/browser.svg)](https://jitpack.io/#appsfeature/browser)
-```gradle
-dependencies {
-        implementation 'com.github.appsfeature:browser:1.0'
-}
-```
-#### Usage  
-```java
-    BrowserSdk.open(this, "Title", AppConstant.REQUEST_URL);
-```
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.widget.ProgressBar;
 
-# Custom Usage
-#### changes in your xml file
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:theme="@style/AppTheme.AppBarOverlay">
+import com.appsfeature.browser.R;
+import com.appsfeature.browser.util.AppConstant;
+import com.browser.activity.BrowserWebView;
+import com.browser.interfaces.BrowserListener;
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:popupTheme="@style/AppTheme.PopupOverlay">
-
-        </androidx.appcompat.widget.Toolbar>
-
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <include layout="@layout/browser_layout_web_view"/>
-
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_centerInParent="true" />
-
-    </RelativeLayout>
-
-
-</LinearLayout>
-
-```
-
-#### changes in your java file
-```java
 public class BrowserCustomActivity extends AppCompatActivity {
+
 
     private ProgressBar progressBar;
     private Toolbar toolbar;
@@ -117,6 +58,15 @@ public class BrowserCustomActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     protected void onPause() {
@@ -149,5 +99,3 @@ public class BrowserCustomActivity extends AppCompatActivity {
         webView.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 }
-```
- 
