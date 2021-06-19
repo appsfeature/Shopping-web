@@ -26,6 +26,7 @@ public class SplashScreen extends Activity {
 		new Handler().postDelayed(new Runnable() {
 			@Override
 			public void run() {
+//				BrowserSdk.open(SplashScreen.this, "Live Tv", AppConstant.BASE_URL, false);
 				startActivity(new Intent(SplashScreen.this, BrowserCustomActivity.class));
 				finish();
 			}

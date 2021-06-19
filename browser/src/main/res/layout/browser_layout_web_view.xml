@@ -35,4 +35,6 @@
 
     </RelativeLayout>
 
+    <include layout="@layout/browser_layout_error"/>
+
 </RelativeLayout>

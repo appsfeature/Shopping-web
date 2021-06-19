@@ -5,15 +5,19 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Build;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.ConsoleMessage;
+import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -38,6 +42,8 @@ public class BrowserWebView {
     private boolean isRemoveHeaderFooter = false;
     private boolean isFixCropRatio = false;
     private BrowserListener callback;
+    private View layoutInternetError;
+    private String mUrl;
 
     public BrowserWebView(Activity activity) {
         this.activity = activity;
@@ -71,16 +77,29 @@ public class BrowserWebView {
     }
 
     public void loadUrl(String url) {
-        if (TextUtils.isEmpty(url)) {
+        this.mUrl = url;
+        if (webView == null || TextUtils.isEmpty(url)) {
             BrowserSdk.showToast(activity, "Invalid Url");
             activity.finish();
             return;
+        }
+        webView.setVisibility(View.INVISIBLE);
+        if (callback != null) {
+            callback.onProgressBarUpdate(View.VISIBLE);
         }
         webView.loadUrl(url);
     }
 
     private void initView(View rootView) {
         webView = rootView.findViewById(R.id.webView);
+        layoutInternetError = rootView.findViewById(R.id.layout_internet_error);
+        (rootView.findViewById(R.id.btn_refresh)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateErrorUi(false);
+                loadUrl(mUrl);
+            }
+        });
         webView.setWebChromeClient(new WebChromeClient() {
 
             @Override
@@ -226,6 +245,9 @@ public class BrowserWebView {
                 if (callback != null) {
                     callback.onProgressBarUpdate(View.GONE);
                 }
+                if (webView != null) {
+                    webView.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
@@ -234,9 +256,35 @@ public class BrowserWebView {
                 if (callback != null) {
                     callback.onProgressBarUpdate(View.GONE);
                 }
-                webView.setVisibility(View.VISIBLE);
+                if (webView != null) {
+                    webView.setVisibility(View.VISIBLE);
+                }
 //                if (!isUrlPdfType(url))
 //                    view.loadUrl("javascript:console.log('" + TAG + "'+document.getElementsByTagName('html')[0].innerHTML);");
+            }
+
+            @Override
+            public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
+                updateErrorUi(true);
+                super.onReceivedHttpError(view, request, errorResponse);
+            }
+
+            @Override
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                updateErrorUi(true);
+                super.onReceivedSslError(view, handler, error);
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                updateErrorUi(true);
+                super.onReceivedError(view, errorCode, description, failingUrl);
+            }
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                updateErrorUi(true);
+                super.onReceivedError(view, request, error);
             }
         });
         webView.getSettings().setJavaScriptEnabled(true);
@@ -254,6 +302,12 @@ public class BrowserWebView {
         webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
         webView.getSettings().setAppCachePath(activity.getApplicationContext()
                 .getCacheDir().getAbsolutePath());
+    }
+
+    private void updateErrorUi(boolean isVisible) {
+        if (layoutInternetError != null) {
+            layoutInternetError.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+        }
     }
 
 

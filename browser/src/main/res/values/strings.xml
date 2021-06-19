@@ -7,4 +7,7 @@
     <string name="service_option_4">Task management, Team Management, Work Allocation, Status Report, Tracking of Billing and Payment for Unlimited clients and users at one place.</string>
     <string name="service_option_5">Excel is the most powerful tool to manage and analyse various type of data. Our courses from beginner to advanced provide in-depth knowledge about functions, tables and macro for small to large scale businesses.</string>
     <string name="service_option_6">We provide Bookkeeping services, ranging from full outsourcing to accounting supervision services. Preparation of statutory accounts and respective filings.</string>
+    <string name="message_internet_error_title">Check your connection</string>
+    <string name="message_internet_error_description">You don\'t seem to have an active internet connection.</string>
+    <string name="message_internet_error_description2">Please check your connection and try again.</string>
 </resources>

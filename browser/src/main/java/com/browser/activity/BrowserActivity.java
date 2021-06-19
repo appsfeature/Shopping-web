@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -12,14 +13,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.ConsoleMessage;
+import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
@@ -43,6 +48,7 @@ public class BrowserActivity extends BaseToolbarActivity {
     private boolean isRemoveHeaderFooter = false;
     private VideoEnabledWebChromeClient webChromeClient;
     private Toolbar toolbar;
+    private View layoutInternetError;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +87,14 @@ public class BrowserActivity extends BaseToolbarActivity {
 
     private void initDataFromIntent() {
         progressBar = findViewById(R.id.progressBar);
+        layoutInternetError = findViewById(R.id.layout_internet_error);
+        (findViewById(R.id.btn_refresh)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateErrorUi(false);
+                loadUrl();
+            }
+        });
 //        container = findViewById(R.id.container);
         Intent intent = getIntent();
 
@@ -235,6 +249,7 @@ public class BrowserActivity extends BaseToolbarActivity {
             @Override
             public void onPageCommitVisible(WebView view, String url) {
                 super.onPageCommitVisible(view, url);
+                webView.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.GONE);
             }
 
@@ -245,6 +260,30 @@ public class BrowserActivity extends BaseToolbarActivity {
                 webView.setVisibility(View.VISIBLE);
 //                if (!isUrlPdfType(url))
 //                    view.loadUrl("javascript:console.log('" + TAG + "'+document.getElementsByTagName('html')[0].innerHTML);");
+            }
+
+            @Override
+            public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
+                updateErrorUi(true);
+                super.onReceivedHttpError(view, request, errorResponse);
+            }
+
+            @Override
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                updateErrorUi(true);
+                super.onReceivedSslError(view, handler, error);
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                updateErrorUi(true);
+                super.onReceivedError(view, errorCode, description, failingUrl);
+            }
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                updateErrorUi(true);
+                super.onReceivedError(view, request, error);
             }
         });
         webView.getSettings().setJavaScriptEnabled(true);
@@ -262,7 +301,23 @@ public class BrowserActivity extends BaseToolbarActivity {
         webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
         webView.getSettings().setAppCachePath(this.getApplicationContext()
                 .getCacheDir().getAbsolutePath());
-        webView.loadUrl(url);
+        loadUrl();
+    }
+
+    private void updateErrorUi(boolean isVisible) {
+        if (layoutInternetError != null) {
+            layoutInternetError.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void loadUrl() {
+        if (webView != null && !TextUtils.isEmpty(url)) {
+            webView.setVisibility(View.INVISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
+            webView.loadUrl(url);
+        }else {
+            Toast.makeText(this, BrowserConstant.ERROR_INVALID_URL, Toast.LENGTH_SHORT).show();
+        }
     }
 
 
