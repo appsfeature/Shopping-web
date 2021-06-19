@@ -1,4 +1,4 @@
-package com.browser.activity;
+package com.browser.browser;
 
 import android.Manifest;
 import android.app.Activity;
@@ -21,7 +21,6 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.RelativeLayout;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;

@@ -11,7 +11,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.appsfeature.browser.R;
 import com.appsfeature.browser.util.AppConstant;
-import com.browser.activity.BrowserWebView;
+import com.browser.browser.BrowserWebView;
 import com.browser.interfaces.BrowserListener;
 
 public class BrowserCustomActivity extends AppCompatActivity {
