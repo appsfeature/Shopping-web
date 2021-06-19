@@ -9,5 +9,5 @@ public interface BrowserConstant {
 
     String WEB_VIEW_URL = "webViewUrl";
     String TITLE = "title";
-    String ERROR_INVALID_URL = "Invalid Url";
+    String ERROR_MESSAGE_INVALID_URL = "Invalid Url";
 }

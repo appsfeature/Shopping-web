@@ -23,7 +23,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -316,7 +315,7 @@ public class BrowserActivity extends BaseToolbarActivity {
             progressBar.setVisibility(View.VISIBLE);
             webView.loadUrl(url);
         }else {
-            Toast.makeText(this, BrowserConstant.ERROR_INVALID_URL, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, BrowserConstant.ERROR_MESSAGE_INVALID_URL, Toast.LENGTH_SHORT).show();
         }
     }
 
