@@ -6,6 +6,7 @@ package com.browser.util;
 public interface BrowserConstant {
     String BASE_URL = "https://www.bharatsamachartv.in/allinone/" ;
     String IS_REMOVE_HEADER_FOOTER = "is_remove_header_footer";
+    String IS_DISABLE_EXTRA_ERROR = "isDisableExtraError";
 
     String WEB_VIEW_URL = "webViewUrl";
     String TITLE = "title";

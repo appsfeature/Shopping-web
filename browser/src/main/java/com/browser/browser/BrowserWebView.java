@@ -43,6 +43,7 @@ public class BrowserWebView {
     private BrowserListener callback;
     private View layoutInternetError;
     private String mUrl;
+    private boolean isDisableExtraError = false;
 
     public BrowserWebView(Activity activity) {
         this.activity = activity;
@@ -55,6 +56,15 @@ public class BrowserWebView {
 
     public BrowserWebView setRemoveHeaderFooter(boolean removeHeaderFooter) {
         isRemoveHeaderFooter = removeHeaderFooter;
+        return this;
+    }
+
+    public boolean isDisableExtraError() {
+        return isDisableExtraError;
+    }
+
+    public BrowserWebView setDisableExtraError(boolean disableExtraError) {
+        isDisableExtraError = disableExtraError;
         return this;
     }
 
@@ -264,13 +274,17 @@ public class BrowserWebView {
 
             @Override
             public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
-                updateErrorUi(true);
+                if(isDisableExtraError){
+                    updateErrorUi(true);
+                }
                 super.onReceivedHttpError(view, request, errorResponse);
             }
 
             @Override
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-                updateErrorUi(true);
+                if(isDisableExtraError){
+                    updateErrorUi(true);
+                }
                 super.onReceivedSslError(view, handler, error);
             }
 

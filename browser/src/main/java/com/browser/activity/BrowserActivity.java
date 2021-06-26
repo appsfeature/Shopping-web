@@ -23,6 +23,7 @@ public class BrowserActivity extends BaseToolbarActivity {
     private BrowserWebView webView;
     private String url, title;
     private boolean isRemoveHeaderFooter;
+    private boolean isDisableExtraError;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +44,7 @@ public class BrowserActivity extends BaseToolbarActivity {
         webView = new BrowserWebView(this);
         webView.init(this);
         webView.setRemoveHeaderFooter(isRemoveHeaderFooter);
+        webView.setDisableExtraError(isDisableExtraError);
         webView.addBrowserListener(new BrowserListener() {
             @Override
             public void onToolbarVisibilityUpdate(int isVisible) {
@@ -78,6 +80,9 @@ public class BrowserActivity extends BaseToolbarActivity {
         }
         if (intent.hasExtra(BrowserConstant.IS_REMOVE_HEADER_FOOTER)) {
             isRemoveHeaderFooter = intent.getBooleanExtra(BrowserConstant.IS_REMOVE_HEADER_FOOTER, false);
+        }
+        if (intent.hasExtra(BrowserConstant.IS_DISABLE_EXTRA_ERROR)) {
+            isDisableExtraError = intent.getBooleanExtra(BrowserConstant.IS_DISABLE_EXTRA_ERROR, false);
         }
     }
 
