@@ -219,8 +219,8 @@ public class BrowserWebView {
                     }
                     return true;
                 }
-                if (isUrlPdfType(mUrl)) {
-                    openPDF(mUrl);
+                if (isUrlPdfType(url)) {
+                    openPDF(url);
                     return true;
                 }
                 if (url.endsWith("viewer.action=download")) {

@@ -1,8 +1,11 @@
 package com.appsfeature.browser;
 
+import android.app.Activity;
 import android.app.Application;
+import android.util.Log;
 
-import androidx.lifecycle.ViewModelProvider;
+import com.browser.BrowserSdk;
+import com.browser.interfaces.BrowserCallback;
 
 public class AppApplication extends Application {
 
@@ -13,16 +16,17 @@ public class AppApplication extends Application {
     public static AppApplication getInstance() {
         return instance;
     }
-    public ViewModelProvider.Factory viewModelFactory = new ViewModelProvider.AndroidViewModelFactory(this);
-
-    public ViewModelProvider.Factory getViewModelFactory() {
-        return viewModelFactory;
-    }
 
     @Override
     public void onCreate() {
         super.onCreate();
         instance = this;
+        BrowserSdk.getInstance().setCallback(new BrowserCallback() {
+            @Override
+            public void onOpenPdf(Activity activity, String url) {
+                Log.d("PDF", url);
+            }
+        });
     }
 
 }
