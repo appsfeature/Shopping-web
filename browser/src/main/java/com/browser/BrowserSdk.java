@@ -17,11 +17,36 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.browser.activity.BrowserActivity;
+import com.browser.interfaces.BrowserCallback;
 import com.browser.util.BrowserConstant;
 
 import java.net.URISyntaxException;
 
 public class BrowserSdk {
+
+    private static volatile BrowserSdk browserSdk;
+    private BrowserCallback mCallback;
+
+    private BrowserSdk() {
+    }
+
+    public static BrowserSdk getInstance() {
+        if (browserSdk == null) {
+            synchronized (BrowserSdk.class) {
+                if (browserSdk == null) browserSdk = new BrowserSdk();
+            }
+        }
+        return browserSdk;
+    }
+
+    public BrowserCallback getCallback() {
+        return mCallback;
+    }
+
+    public BrowserSdk setCallback(BrowserCallback mCallback) {
+        this.mCallback = mCallback;
+        return this;
+    }
 
     public static void open(Context context, String title, String webUrl) {
         open(context, title, webUrl, true);

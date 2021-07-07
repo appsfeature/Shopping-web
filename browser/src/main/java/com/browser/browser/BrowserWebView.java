@@ -219,6 +219,10 @@ public class BrowserWebView {
                     }
                     return true;
                 }
+                if (isUrlPdfType(mUrl)) {
+                    openPDF(mUrl);
+                    return true;
+                }
                 if (url.endsWith("viewer.action=download")) {
                     Intent i = new Intent(Intent.ACTION_VIEW);
                     i.setData(Uri.parse(url));
@@ -317,6 +321,16 @@ public class BrowserWebView {
                 .getCacheDir().getAbsolutePath());
     }
 
+    private void openPDF(String mUrl) {
+        if (!TextUtils.isEmpty(mUrl)) {
+            if (BrowserSdk.getInstance().getCallback() != null) {
+                BrowserSdk.getInstance().getCallback().onOpenPdf(activity, mUrl);
+            } else {
+                BrowserSdk.openUrlExternal(activity, mUrl);
+            }
+        }
+    }
+
     private void updateErrorUi(boolean isVisible) {
         if (layoutInternetError != null) {
             layoutInternetError.setVisibility(isVisible ? View.VISIBLE : View.GONE);
@@ -351,6 +365,10 @@ public class BrowserWebView {
     //    private String hideGoogleTranslatorHeaderJavaScript = "document.getElementById('home').remove()";
     private static final String hideGoogleTranslatorFooterJavaScript = "document.getElementById('footer').remove()";
 
+
+    private boolean isUrlPdfType(String url) {
+        return url.toLowerCase().endsWith(".pdf");
+    }
 
     private boolean isUrlIntentType(String url) {
         return url.toLowerCase().startsWith("intent://");
