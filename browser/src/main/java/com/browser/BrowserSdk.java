@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.browser.activity.BrowserActivity;
 import com.browser.interfaces.BrowserCallback;
+import com.browser.interfaces.OverrideType;
 import com.browser.interfaces.UrlOverloadingListener;
 import com.browser.util.BrowserConstant;
 
@@ -189,14 +190,26 @@ public class BrowserSdk {
         }
     }
 
-    public void dispatchUrlOverloadingListener(WebView webView, String url) {
+    public void dispatchUrlOverloadingListener(WebView webView, String url, int overrideType) {
         try {
             if (mUrlOverloadingListener.size() > 0) {
                 for (Map.Entry<Integer, UrlOverloadingListener> entry : mUrlOverloadingListener.entrySet()) {
-                    Integer key = entry.getKey();
                     UrlOverloadingListener callback = entry.getValue();
                     if (callback != null) {
-                        callback.onOverrideUrlLoading(webView, url);
+                        switch (overrideType){
+                            case OverrideType.OverrideUrlLoading:
+                                callback.onOverrideUrlLoading(webView, url);
+                                break;
+                            case OverrideType.LoadUrl:
+                                callback.onLoadUrl(url);
+                                break;
+                            case OverrideType.PageFinished:
+                                callback.onPageFinished(webView, url);
+                                break;
+                            case OverrideType.ReceivedError:
+                                callback.onReceivedError(webView);
+                                break;
+                        }
                     }
                 }
             }

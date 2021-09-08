@@ -28,6 +28,7 @@ import androidx.annotation.NonNull;
 import com.browser.BrowserSdk;
 import com.browser.R;
 import com.browser.interfaces.BrowserListener;
+import com.browser.interfaces.OverrideType;
 import com.browser.util.BrowserConstant;
 import com.browser.views.VideoEnabledWebChromeClient;
 import com.browser.views.VideoEnabledWebView;
@@ -210,7 +211,7 @@ public class BrowserWebView {
                 if(BrowserSdk.getInstance().getUrlOverloadingList().size() > 0){
                     for (String overrideUrl : BrowserSdk.getInstance().getUrlOverloadingList()){
                         if(url.contains(overrideUrl)){
-                            BrowserSdk.getInstance().dispatchUrlOverloadingListener(view, url);
+                            BrowserSdk.getInstance().dispatchUrlOverloadingListener(view, url, OverrideType.OverrideUrlLoading);
                             return true;
                         }
                     }
@@ -265,6 +266,7 @@ public class BrowserWebView {
                     return true;
                 }
                 view.loadUrl(url);
+                BrowserSdk.getInstance().dispatchUrlOverloadingListener(view, url, OverrideType.LoadUrl);
                 return true;
             }
 
@@ -293,6 +295,7 @@ public class BrowserWebView {
                 if (webView != null) {
                     webView.setVisibility(View.VISIBLE);
                 }
+                BrowserSdk.getInstance().dispatchUrlOverloadingListener(view, url, OverrideType.PageFinished);
 //                if (!isUrlPdfType(url))
 //                    view.loadUrl("javascript:console.log('" + TAG + "'+document.getElementsByTagName('html')[0].innerHTML);");
             }
@@ -316,12 +319,14 @@ public class BrowserWebView {
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 updateErrorUi(true);
+                BrowserSdk.getInstance().dispatchUrlOverloadingListener(view, "", OverrideType.ReceivedError);
                 super.onReceivedError(view, errorCode, description, failingUrl);
             }
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 updateErrorUi(true);
+                BrowserSdk.getInstance().dispatchUrlOverloadingListener(view, "", OverrideType.ReceivedError);
                 super.onReceivedError(view, request, error);
             }
         });
