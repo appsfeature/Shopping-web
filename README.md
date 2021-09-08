@@ -21,7 +21,27 @@ dependencies {
 ```
 #### Usage  
 ```java
+    // Open url method
     BrowserSdk.open(this, "Title", AppConstant.REQUEST_URL);
+
+    // Override Url method
+    List<String> urlOverloadingList = new ArrayList<>();
+    urlOverloadingList.add("https://stackoverflow.com/tags");
+
+    BrowserSdk.getInstance().addUrlOverloadingListener(this.hashCode(), urlOverloadingList, new UrlOverloadingListener() {
+        @Override
+        public void onOverrideUrlLoading(WebView view, String url) {
+            Log.d("@Hammpy", "url" + url);
+        }
+    });
+
+    // Getting clicked pdf url
+    BrowserSdk.getInstance().setCallback(new BrowserCallback() {
+        @Override
+        public void onOpenPdf(Activity activity, String url) {
+            Log.d("PDF", url);
+        }
+    });
 ```
 
 # Custom Usage
@@ -90,17 +110,34 @@ dependencies {
 
 #### changes in your java file
 ```java
-public class BrowserCustomActivity extends AppCompatActivity {
+import android.content.Intent;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.MenuItem;
+import android.widget.ProgressBar;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
+
+import com.browser.BrowserSdk;
+import com.browser.activity.BaseToolbarActivity;
+import com.browser.browser.BrowserWebView;
+import com.browser.interfaces.BrowserListener;
+import com.browser.util.BrowserConstant;
+
+public class AppBrowserActivity extends BaseToolbarActivity {
 
     private ProgressBar progressBar;
     private Toolbar toolbar;
     private BrowserWebView webView;
+    private String url, title;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+        setContentView(R.layout.browser_activity);
         setupToolbar();
+        initDataFromIntent();
 
         progressBar = findViewById(com.browser.R.id.progressBar);
 
@@ -122,7 +159,22 @@ public class BrowserCustomActivity extends AppCompatActivity {
             }
         });
 
-        webView.loadUrl(AppConstant.BASE_URL);
+        if (TextUtils.isEmpty(url)) {
+            BrowserSdk.showToast(this, "Invalid Url");
+            finish();
+            return;
+        }
+        webView.loadUrl(url);
+    }
+    private void initDataFromIntent() {
+        Intent intent = getIntent();
+
+        if (intent.hasExtra(BrowserConstant.WEB_VIEW_URL)) {
+            url = intent.getStringExtra(BrowserConstant.WEB_VIEW_URL);
+        }
+        if (intent.hasExtra(BrowserConstant.TITLE)) {
+            title = intent.getStringExtra(BrowserConstant.TITLE);
+        }
     }
 
     private void setupToolbar() {
@@ -130,6 +182,9 @@ public class BrowserCustomActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            if (title != null) {
+                getSupportActionBar().setTitle(title);
+            }
         }
     }
 

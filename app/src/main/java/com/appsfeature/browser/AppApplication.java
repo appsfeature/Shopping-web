@@ -1,11 +1,14 @@
 package com.appsfeature.browser;
 
-import android.app.Activity;
 import android.app.Application;
 import android.util.Log;
+import android.webkit.WebView;
 
 import com.browser.BrowserSdk;
-import com.browser.interfaces.BrowserCallback;
+import com.browser.interfaces.UrlOverloadingListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AppApplication extends Application {
 
@@ -21,12 +24,21 @@ public class AppApplication extends Application {
     public void onCreate() {
         super.onCreate();
         instance = this;
-        BrowserSdk.getInstance().setCallback(new BrowserCallback() {
+        List<String> urlOverloadingList = new ArrayList<>();
+        urlOverloadingList.add("https://stackoverflow.com/tags");
+
+        BrowserSdk.getInstance().addUrlOverloadingListener(this.hashCode(), urlOverloadingList, new UrlOverloadingListener() {
             @Override
-            public void onOpenPdf(Activity activity, String url) {
-                Log.d("PDF", url);
+            public void onOverrideUrlLoading(WebView view, String url) {
+                Log.d("@Hammpy", "url" + url);
             }
         });
+//        BrowserSdk.getInstance().setCallback(new BrowserCallback() {
+//            @Override
+//            public void onOpenPdf(Activity activity, String url) {
+//                Log.d("PDF", url);
+//            }
+//        });
     }
 
 }

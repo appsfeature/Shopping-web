@@ -12,20 +12,31 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.browser.activity.BrowserActivity;
 import com.browser.interfaces.BrowserCallback;
+import com.browser.interfaces.UrlOverloadingListener;
 import com.browser.util.BrowserConstant;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BrowserSdk {
 
     private static volatile BrowserSdk browserSdk;
     private BrowserCallback mCallback;
+    private final List<String> urlOverloadingList = new ArrayList<>();
+
+    public List<String> getUrlOverloadingList() {
+        return urlOverloadingList;
+    }
 
     private BrowserSdk() {
     }
@@ -49,15 +60,33 @@ public class BrowserSdk {
     }
 
     public static void open(Context context, String title, String webUrl) {
-        open(context, title, webUrl, true);
+        open(context, title, webUrl, false);
     }
 
-    public static void open(Context context, String title, String webUrl, boolean isRemoveHeaderFooter) {
+    public static void open(Context context, String title, String webUrl, boolean isEmbedPdf) {
+        open(context, title, webUrl, isEmbedPdf, false);
+    }
+
+    public static void open(Context context, String title, String webUrl, boolean isEmbedPdf, boolean isRemoveHeaderFooter) {
         try {
             Intent intent = new Intent(context, BrowserActivity.class);
             intent.putExtra(BrowserConstant.WEB_VIEW_URL, webUrl);
             intent.putExtra(BrowserConstant.TITLE, title);
+            intent.putExtra(BrowserConstant.IS_EMBED_PDF, isEmbedPdf);
             intent.putExtra(BrowserConstant.IS_REMOVE_HEADER_FOOTER, isRemoveHeaderFooter);
+            context.startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            BrowserSdk.showToast(context, "No option available for take action.");
+        }
+    }
+
+    public static void openPDFViewer(Context context, String title, String webUrl) {
+        try {
+            Intent intent = new Intent(context, BrowserActivity.class);
+            intent.putExtra(BrowserConstant.WEB_VIEW_URL, webUrl);
+            intent.putExtra(BrowserConstant.TITLE, title);
+            intent.putExtra(BrowserConstant.IS_OPEN_PDF_IN_WEBVIEW, true);
             context.startActivity(intent);
         } catch (Exception e) {
             e.printStackTrace();
@@ -113,6 +142,64 @@ public class BrowserSdk {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             activity.startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void clearUrlOverloadingList() {
+        clearUrlOverloadingList(null);
+    }
+
+    public void clearUrlOverloadingList(List<String> urlOverloadingRemoveList) {
+        if(urlOverloadingRemoveList != null) {
+            try {
+                for (String item : urlOverloadingRemoveList){
+                    for (int i = 0; i < urlOverloadingList.size(); i++){
+                        if(item.equalsIgnoreCase(urlOverloadingList.get(i))){
+                            urlOverloadingList.remove(i);
+                            break;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }else {
+            this.urlOverloadingList.clear();
+        }
+    }
+
+    private final HashMap<Integer, UrlOverloadingListener> mUrlOverloadingListener = new HashMap<>();
+
+    public BrowserSdk addUrlOverloadingListener(int hashCode, List<String> urlOverloadingList, UrlOverloadingListener callback) {
+        synchronized (mUrlOverloadingListener) {
+            this.urlOverloadingList.addAll(urlOverloadingList);
+            this.mUrlOverloadingListener.put(hashCode, callback);
+        }
+        return this;
+    }
+
+    public void removeUrlOverloadingListener(int hashCode) {
+        if (mUrlOverloadingListener.get(hashCode) != null) {
+            synchronized (mUrlOverloadingListener) {
+                this.mUrlOverloadingListener.remove(hashCode);
+            }
+        }
+    }
+
+    public void dispatchUrlOverloadingListener(WebView webView, String url) {
+        try {
+            if (mUrlOverloadingListener.size() > 0) {
+                for (Map.Entry<Integer, UrlOverloadingListener> entry : mUrlOverloadingListener.entrySet()) {
+                    Integer key = entry.getKey();
+                    UrlOverloadingListener callback = entry.getValue();
+                    if (callback != null) {
+                        callback.onOverrideUrlLoading(webView, url);
+                    }
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -28,6 +28,7 @@ import androidx.annotation.NonNull;
 import com.browser.BrowserSdk;
 import com.browser.R;
 import com.browser.interfaces.BrowserListener;
+import com.browser.util.BrowserConstant;
 import com.browser.views.VideoEnabledWebChromeClient;
 import com.browser.views.VideoEnabledWebView;
 import com.theartofdev.edmodo.cropper.CropImage;
@@ -44,6 +45,8 @@ public class BrowserWebView {
     private View layoutInternetError;
     private String mUrl;
     private boolean isDisableExtraError = false;
+    private boolean isEmbedPdf = false;
+    private boolean isOpenPdfInWebView = false;
 
     public BrowserWebView(Activity activity) {
         this.activity = activity;
@@ -54,8 +57,18 @@ public class BrowserWebView {
         return this;
     }
 
+    public BrowserWebView setEmbedPDF(boolean isEmbedPdf) {
+        this.isEmbedPdf = isEmbedPdf;
+        return this;
+    }
+
+    public BrowserWebView setOpenPdfInWebView(boolean isOpenPdfInWebView) {
+        this.isOpenPdfInWebView = isOpenPdfInWebView;
+        return this;
+    }
+
     public BrowserWebView setRemoveHeaderFooter(boolean removeHeaderFooter) {
-        isRemoveHeaderFooter = removeHeaderFooter;
+        this.isRemoveHeaderFooter = removeHeaderFooter;
         return this;
     }
 
@@ -64,12 +77,12 @@ public class BrowserWebView {
     }
 
     public BrowserWebView setDisableExtraError(boolean disableExtraError) {
-        isDisableExtraError = disableExtraError;
+        this.isDisableExtraError = disableExtraError;
         return this;
     }
 
     public BrowserWebView setFixCropRatio(boolean fixCropRatio) {
-        isFixCropRatio = fixCropRatio;
+        this.isFixCropRatio = fixCropRatio;
         return this;
     }
 
@@ -194,6 +207,14 @@ public class BrowserWebView {
             }
 
             private boolean filterUrl(WebView view, String url) {
+                if(BrowserSdk.getInstance().getUrlOverloadingList().size() > 0){
+                    for (String overrideUrl : BrowserSdk.getInstance().getUrlOverloadingList()){
+                        if(url.contains(overrideUrl)){
+                            BrowserSdk.getInstance().dispatchUrlOverloadingListener(view, url);
+                            return true;
+                        }
+                    }
+                }
                 if (url.startsWith("tel:")) {
                     try {
                         Intent intent = new Intent(Intent.ACTION_DIAL,
@@ -499,5 +520,4 @@ public class BrowserWebView {
             }
         }
     }
-
 }

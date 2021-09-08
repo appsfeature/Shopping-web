@@ -25,6 +25,8 @@ public class BrowserActivity extends BaseToolbarActivity {
     private String url, title;
     private boolean isRemoveHeaderFooter;
     private boolean isDisableExtraError;
+    private boolean isEmbedPdf;
+    private boolean isOpenPdfInWebView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +48,8 @@ public class BrowserActivity extends BaseToolbarActivity {
         webView.init(this);
         webView.setRemoveHeaderFooter(isRemoveHeaderFooter);
         webView.setDisableExtraError(isDisableExtraError);
+        webView.setEmbedPDF(isEmbedPdf);
+        webView.setOpenPdfInWebView(isOpenPdfInWebView);
         webView.addBrowserListener(new BrowserListener() {
             @Override
             public void onToolbarVisibilityUpdate(int isVisible) {
@@ -81,6 +85,12 @@ public class BrowserActivity extends BaseToolbarActivity {
         }
         if (intent.hasExtra(BrowserConstant.IS_REMOVE_HEADER_FOOTER)) {
             isRemoveHeaderFooter = intent.getBooleanExtra(BrowserConstant.IS_REMOVE_HEADER_FOOTER, false);
+        }
+        if (intent.hasExtra(BrowserConstant.IS_EMBED_PDF)) {
+            isEmbedPdf = intent.getBooleanExtra(BrowserConstant.IS_EMBED_PDF, false);
+        }
+        if (intent.hasExtra(BrowserConstant.IS_OPEN_PDF_IN_WEBVIEW)) {
+            isOpenPdfInWebView = intent.getBooleanExtra(BrowserConstant.IS_OPEN_PDF_IN_WEBVIEW, false);
         }
         if (intent.hasExtra(BrowserConstant.IS_DISABLE_EXTRA_ERROR)) {
             isDisableExtraError = intent.getBooleanExtra(BrowserConstant.IS_DISABLE_EXTRA_ERROR, false);
