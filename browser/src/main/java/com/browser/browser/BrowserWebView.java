@@ -310,7 +310,7 @@ public class BrowserWebView {
             public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
                 if (errorResponse != null) {
                     try {
-                        BrowserLogger.i("onReceivedHttpError()", errorResponse.toString());
+                        BrowserLogger.info("onReceivedHttpError()", errorResponse.toString());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -325,7 +325,7 @@ public class BrowserWebView {
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
                 if (error != null) {
                     try {
-                        BrowserLogger.i("onReceivedSslError()", error.toString());
+                        BrowserLogger.info("onReceivedSslError()", error.toString());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
