@@ -30,6 +30,7 @@ import com.browser.R;
 import com.browser.interfaces.BrowserListener;
 import com.browser.interfaces.OverrideType;
 import com.browser.util.BrowserConstant;
+import com.browser.util.BrowserLogger;
 import com.browser.views.VideoEnabledWebChromeClient;
 import com.browser.views.VideoEnabledWebView;
 import com.theartofdev.edmodo.cropper.CropImage;
@@ -100,9 +101,11 @@ public class BrowserWebView {
     }
 
     public void loadUrl(String url) {
+        BrowserLogger.info("loadUrl()");
         this.mUrl = url;
         if (webView == null || TextUtils.isEmpty(url)) {
             BrowserSdk.showToast(activity, "Invalid Url");
+            BrowserLogger.e("loadUrl()", "Url is null or empty");
             activity.finish();
             return;
         }
@@ -111,6 +114,7 @@ public class BrowserWebView {
             callback.onProgressBarUpdate(View.VISIBLE);
         }
         webView.loadUrl(url);
+        BrowserLogger.d("loadUrl()", url);
     }
 
     private void initView(View rootView) {
@@ -208,9 +212,10 @@ public class BrowserWebView {
             }
 
             private boolean filterUrl(WebView view, String url) {
-                if(BrowserSdk.getInstance().getUrlOverloadingList().size() > 0){
-                    for (String overrideUrl : BrowserSdk.getInstance().getUrlOverloadingList()){
-                        if(url.contains(overrideUrl)){
+                BrowserLogger.d("shouldOverrideUrlLoading()", url);
+                if (BrowserSdk.getInstance().getUrlOverloadingList().size() > 0) {
+                    for (String overrideUrl : BrowserSdk.getInstance().getUrlOverloadingList()) {
+                        if (url.contains(overrideUrl)) {
                             BrowserSdk.getInstance().dispatchUrlOverloadingListener(view, url, OverrideType.OverrideUrlLoading);
                             return true;
                         }
@@ -289,6 +294,7 @@ public class BrowserWebView {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                BrowserLogger.info("onPageFinished()");
                 if (callback != null) {
                     callback.onProgressBarUpdate(View.GONE);
                 }
@@ -302,7 +308,14 @@ public class BrowserWebView {
 
             @Override
             public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
-                if(isDisableExtraError){
+                if (errorResponse != null) {
+                    try {
+                        BrowserLogger.i("onReceivedHttpError()", errorResponse.toString());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (isDisableExtraError) {
                     updateErrorUi(true);
                 }
                 super.onReceivedHttpError(view, request, errorResponse);
@@ -310,7 +323,14 @@ public class BrowserWebView {
 
             @Override
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-                if(isDisableExtraError){
+                if (error != null) {
+                    try {
+                        BrowserLogger.i("onReceivedSslError()", error.toString());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (isDisableExtraError) {
                     updateErrorUi(true);
                 }
                 super.onReceivedSslError(view, handler, error);
@@ -318,6 +338,13 @@ public class BrowserWebView {
 
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                if (description != null) {
+                    try {
+                        BrowserLogger.e("onReceivedError()", "errorCode:" + errorCode, description);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
                 updateErrorUi(true);
                 BrowserSdk.getInstance().dispatchUrlOverloadingListener(view, "", OverrideType.ReceivedError);
                 super.onReceivedError(view, errorCode, description, failingUrl);
@@ -325,6 +352,13 @@ public class BrowserWebView {
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                if (error != null) {
+                    try {
+                        BrowserLogger.e("onReceivedError()", error.toString());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
                 updateErrorUi(true);
                 BrowserSdk.getInstance().dispatchUrlOverloadingListener(view, "", OverrideType.ReceivedError);
                 super.onReceivedError(view, request, error);
@@ -438,6 +472,7 @@ public class BrowserWebView {
     private Uri mCropImageUri;
 
     private void startCropImageActivity(Uri imageUri) {
+        BrowserLogger.info("startCropImageActivity(Uri imageUri)", "imageUri:" + imageUri.toString());
         if (isFixCropRatio) {
             CropImage.activity(imageUri)
                     .setAspectRatio(1, 1)
@@ -475,6 +510,9 @@ public class BrowserWebView {
         if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 Uri imageUri = CropImage.getPickImageResultUri(activity, data);
+                if(imageUri != null) {
+                    BrowserLogger.info("onActivityResult", "CropImage.getPickImageResultUri(activity, data)", "imageUri:" + imageUri.toString());
+                }
 
                 // For API >= 23 we need to check specifically that we have permissions to read external storage.
                 if (CropImage.isReadExternalStoragePermissionsRequired(activity, imageUri)) {
@@ -489,20 +527,26 @@ public class BrowserWebView {
                 }
             } else {
                 mFilePathCallback.onReceiveValue(null);
+                BrowserLogger.e("onActivityResult", "resultCode : Activity.RESULT_CANCELED");
             }
         } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == Activity.RESULT_OK) {
                 mCropImageUri = result.getUri();
+                if(mCropImageUri != null) {
+                    BrowserLogger.info("onActivityResult", "result.getUri()", "mCropImageUri:" + mCropImageUri.toString());
+                }
 //                imagePath = mCropImageUri.getPath();
 //                setImage(mCropImageUri.toString());
                 mFilePathCallback.onReceiveValue(new Uri[]{mCropImageUri});
             } else {
                 mFilePathCallback.onReceiveValue(null);
+                BrowserLogger.e("onActivityResult", "resultCode" + requestCode);
             }
         } else {
             if (resultCode == Activity.RESULT_CANCELED) {
                 mFilePathCallback.onReceiveValue(null);
+                BrowserLogger.e("onActivityResult", "resultCode : Activity.RESULT_CANCELED");
             }
         }
     }
@@ -512,16 +556,20 @@ public class BrowserWebView {
         if (requestCode == CropImage.CAMERA_CAPTURE_PERMISSIONS_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 CropImage.startPickImageActivity(activity);
+                BrowserLogger.info("CropImage.startPickImageActivity(activity);");
             } else {
                 BrowserSdk.showToast(activity, "Cancelling, required permissions are not granted");
+                BrowserLogger.e("onRequestPermissionsResult()", "Cancelling, required permissions are not granted");
             }
         }
         if (requestCode == CropImage.PICK_IMAGE_PERMISSIONS_REQUEST_CODE) {
             if (mCropImageUri != null && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // required permissions granted, start crop image activity
                 startCropImageActivity(mCropImageUri);
+                BrowserLogger.info("startCropImageActivity(mCropImageUri)" , "mCropImageUri:" + mCropImageUri.toString());
             } else {
                 BrowserSdk.showToast(activity, "Cancelling, required permissions are not granted");
+                BrowserLogger.e("onRequestPermissionsResult()", "Cancelling, required permissions are not granted");
             }
         }
     }

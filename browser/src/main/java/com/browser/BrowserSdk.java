@@ -34,6 +34,7 @@ public class BrowserSdk {
     private static volatile BrowserSdk browserSdk;
     private BrowserCallback mCallback;
     private final List<String> urlOverloadingList = new ArrayList<>();
+    private boolean isEnableDebugMode = false;
 
     public List<String> getUrlOverloadingList() {
         return urlOverloadingList;
@@ -49,6 +50,19 @@ public class BrowserSdk {
             }
         }
         return browserSdk;
+    }
+
+    public boolean isEnableDebugMode() {
+        return isEnableDebugMode;
+    }
+
+    /**
+     * @param isDebug = BuildConfig.DEBUG
+     * @return this
+     */
+    public BrowserSdk setDebugMode(Boolean isDebug) {
+        isEnableDebugMode = isDebug;
+        return this;
     }
 
     public BrowserCallback getCallback() {

@@ -27,7 +27,9 @@ public class AppApplication extends Application {
         List<String> urlOverloadingList = new ArrayList<>();
         urlOverloadingList.add("https://stackoverflow.com/tags");
 
-        BrowserSdk.getInstance().addUrlOverloadingListener(this.hashCode(), urlOverloadingList, new UrlOverloadingListener() {
+        BrowserSdk.getInstance()
+                .setDebugMode(BuildConfig.DEBUG)
+                .addUrlOverloadingListener(this.hashCode(), urlOverloadingList, new UrlOverloadingListener() {
             @Override
             public void onOverrideUrlLoading(WebView view, String url) {
                 Log.d("@Hammpy", "url" + url);
