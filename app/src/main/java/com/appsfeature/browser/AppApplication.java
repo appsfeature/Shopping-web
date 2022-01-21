@@ -29,12 +29,14 @@ public class AppApplication extends Application {
 
         BrowserSdk.getInstance()
                 .setDebugMode(BuildConfig.DEBUG)
+                .setEnableDeveloperMode(this, false)
+                .setEnableInternetErrorViewOnly(this, false)
                 .addUrlOverloadingListener(this.hashCode(), urlOverloadingList, new UrlOverloadingListener() {
-            @Override
-            public void onOverrideUrlLoading(WebView view, String url) {
-                Log.d("@Hammpy", "url" + url);
-            }
-        });
+                    @Override
+                    public void onOverrideUrlLoading(WebView view, String url) {
+                        Log.d("@Hammpy", "url" + url);
+                    }
+                });
 //        BrowserSdk.getInstance().setCallback(new BrowserCallback() {
 //            @Override
 //            public void onOpenPdf(Activity activity, String url) {

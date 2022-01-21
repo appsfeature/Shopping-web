@@ -29,8 +29,8 @@ import com.browser.BrowserSdk;
 import com.browser.R;
 import com.browser.interfaces.BrowserListener;
 import com.browser.interfaces.OverrideType;
-import com.browser.util.BrowserConstant;
 import com.browser.util.BrowserLogger;
+import com.browser.util.BrowserUtil;
 import com.browser.views.VideoEnabledWebChromeClient;
 import com.browser.views.VideoEnabledWebView;
 import com.theartofdev.edmodo.cropper.CropImage;
@@ -46,7 +46,7 @@ public class BrowserWebView {
     private BrowserListener callback;
     private View layoutInternetError;
     private String mUrl;
-    private boolean isDisableExtraError = false;
+    private boolean isEnableExtraError = false;
     private boolean isEmbedPdf = false;
     private boolean isOpenPdfInWebView = false;
 
@@ -74,12 +74,12 @@ public class BrowserWebView {
         return this;
     }
 
-    public boolean isDisableExtraError() {
-        return isDisableExtraError;
+    public boolean isEnableExtraError() {
+        return isEnableExtraError;
     }
 
-    public BrowserWebView setDisableExtraError(boolean disableExtraError) {
-        this.isDisableExtraError = disableExtraError;
+    public BrowserWebView setEnableExtraError(boolean enableExtraError) {
+        this.isEnableExtraError = enableExtraError;
         return this;
     }
 
@@ -123,7 +123,7 @@ public class BrowserWebView {
         (rootView.findViewById(R.id.btn_refresh)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateErrorUi(false);
+                updateErrorUi(false, null);
                 loadUrl(mUrl);
             }
         });
@@ -306,30 +306,34 @@ public class BrowserWebView {
 
             @Override
             public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
+                String errorDetail = null;
                 if (errorResponse != null) {
                     try {
+                        errorDetail = errorResponse.toString();
                         BrowserLogger.info("onReceivedHttpError()", errorResponse.toString());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
-                if (isDisableExtraError) {
-                    updateErrorUi(true);
+                if (isEnableExtraError) {
+                    updateErrorUi(true, errorDetail);
                 }
                 super.onReceivedHttpError(view, request, errorResponse);
             }
 
             @Override
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                String errorDetail = null;
                 if (error != null) {
                     try {
+                        errorDetail = error.toString();
                         BrowserLogger.info("onReceivedSslError()", error.toString());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
-                if (isDisableExtraError) {
-                    updateErrorUi(true);
+                if (isEnableExtraError) {
+                    updateErrorUi(true, errorDetail);
                 }
                 super.onReceivedSslError(view, handler, error);
             }
@@ -343,21 +347,24 @@ public class BrowserWebView {
                         e.printStackTrace();
                     }
                 }
-                updateErrorUi(true);
+                String errorDetail = description + "\n\n" + failingUrl;
+                updateErrorUi(true, errorDetail);
                 BrowserSdk.getInstance().dispatchUrlOverloadingListener(view, "", OverrideType.ReceivedError);
                 super.onReceivedError(view, errorCode, description, failingUrl);
             }
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                String errorDetail = null;
                 if (error != null) {
                     try {
+                        errorDetail =  error.toString();
                         BrowserLogger.e("onReceivedError()", error.toString());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
-                updateErrorUi(true);
+                updateErrorUi(true, errorDetail);
                 BrowserSdk.getInstance().dispatchUrlOverloadingListener(view, "", OverrideType.ReceivedError);
                 super.onReceivedError(view, request, error);
             }
@@ -389,10 +396,8 @@ public class BrowserWebView {
         }
     }
 
-    private void updateErrorUi(boolean isVisible) {
-        if (layoutInternetError != null) {
-            layoutInternetError.setVisibility(isVisible ? View.VISIBLE : View.GONE);
-        }
+    private void updateErrorUi(boolean isVisible, String errorDetail) {
+        BrowserUtil.showErrorView(layoutInternetError, isVisible, errorDetail);
     }
 
 

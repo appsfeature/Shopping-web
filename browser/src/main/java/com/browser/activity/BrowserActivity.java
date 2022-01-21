@@ -24,7 +24,7 @@ public class BrowserActivity extends BaseToolbarActivity {
     private BrowserWebView webView;
     private String url, title;
     private boolean isRemoveHeaderFooter;
-    private boolean isDisableExtraError;
+    private boolean isEnableExtraError;
     private boolean isEmbedPdf;
     private boolean isOpenPdfInWebView;
 
@@ -47,7 +47,7 @@ public class BrowserActivity extends BaseToolbarActivity {
         webView = new BrowserWebView(this);
         webView.init(this);
         webView.setRemoveHeaderFooter(isRemoveHeaderFooter);
-        webView.setDisableExtraError(isDisableExtraError);
+        webView.setEnableExtraError(isEnableExtraError);
         webView.setEmbedPDF(isEmbedPdf);
         webView.setOpenPdfInWebView(isOpenPdfInWebView);
         webView.addBrowserListener(new BrowserListener() {
@@ -92,8 +92,8 @@ public class BrowserActivity extends BaseToolbarActivity {
         if (intent.hasExtra(BrowserConstant.IS_OPEN_PDF_IN_WEBVIEW)) {
             isOpenPdfInWebView = intent.getBooleanExtra(BrowserConstant.IS_OPEN_PDF_IN_WEBVIEW, false);
         }
-        if (intent.hasExtra(BrowserConstant.IS_DISABLE_EXTRA_ERROR)) {
-            isDisableExtraError = intent.getBooleanExtra(BrowserConstant.IS_DISABLE_EXTRA_ERROR, false);
+        if (intent.hasExtra(BrowserConstant.IS_ENABLE_EXTRA_ERROR)) {
+            isEnableExtraError = intent.getBooleanExtra(BrowserConstant.IS_ENABLE_EXTRA_ERROR, false);
         }
     }
 

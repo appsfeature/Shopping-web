@@ -22,6 +22,7 @@ import com.browser.interfaces.BrowserCallback;
 import com.browser.interfaces.OverrideType;
 import com.browser.interfaces.UrlOverloadingListener;
 import com.browser.util.BrowserConstant;
+import com.browser.util.BrowserPreferences;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -230,5 +231,18 @@ public class BrowserSdk {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * @apiNote : use to hide internet error view.
+     */
+    public BrowserSdk setEnableDeveloperMode(Context context, boolean isEnable) {
+        BrowserPreferences.setEnableDeveloperMode(context, isEnable);
+        return this;
+    }
+
+    public BrowserSdk setEnableInternetErrorViewOnly(Context context, boolean isEnable) {
+        BrowserPreferences.setEnableInternetErrorViewOnly(context, isEnable);
+        return this;
     }
 }

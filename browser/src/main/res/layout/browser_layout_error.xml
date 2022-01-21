@@ -11,41 +11,45 @@
 
 
     <ImageView
+        android:id="@+id/iv_error"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:src="@drawable/ic_browser_internet_error"
         app:tint="@color/colorPrimaryDark" />
 
     <TextView
+        android:id="@+id/tv_error_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:textStyle="bold"
         android:textSize="18sp"
         android:textColor="@color/colorPrimary"
         android:text="@string/message_internet_error_title"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="12sp"
-        android:gravity="center"
-        android:textColor="@color/colorPrimary"
-        android:text="@string/message_internet_error_description"/>
+   <androidx.core.widget.NestedScrollView
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="12sp"
-        android:gravity="center"
-        android:textColor="@color/colorPrimary"
-        android:text="@string/message_internet_error_description2"/>
+       <TextView
+           android:id="@+id/tv_error_message"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:paddingLeft="16dp"
+           android:paddingRight="16dp"
+           android:textSize="12sp"
+           android:gravity="center"
+           android:textColor="@color/colorPrimary"
+           android:text="@string/message_internet_error_description"/>
+   </androidx.core.widget.NestedScrollView>
 
     <Button
         android:id="@+id/btn_refresh"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
         android:textColor="@android:color/white"
+        android:layout_marginBottom="16dp"
         android:background="@drawable/bg_browser_button_refresh"
         android:text="Refresh"/>
 

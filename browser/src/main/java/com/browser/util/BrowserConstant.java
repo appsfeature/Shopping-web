@@ -8,7 +8,7 @@ public interface BrowserConstant {
     String URL_GOOGLE_DOC_VIEWER = "http://docs.google.com/gview?embedded=true&url=" ;
 //    String URL_GOOGLE_DOC_VIEWER = "https://docs.google.com/viewer?url=" ;
     String IS_REMOVE_HEADER_FOOTER = "is_remove_header_footer";
-    String IS_DISABLE_EXTRA_ERROR = "isDisableExtraError";
+    String IS_ENABLE_EXTRA_ERROR = "isEnableExtraError";
 
     String WEB_VIEW_URL = "webViewUrl";
     String TITLE = "title";
