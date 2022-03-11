@@ -127,7 +127,19 @@ public class BrowserWebView {
                 loadUrl(mUrl);
             }
         });
-        webView.setWebChromeClient(new WebChromeClient() {
+
+        View nonVideoLayout = rootView.findViewById(R.id.nonVideoLayout); // Your own view, read class comments
+        ViewGroup videoLayout = (ViewGroup) rootView.findViewById(R.id.videoLayout); // Your own view, read class comments
+        //noinspection all
+        View loadingView = activity.getLayoutInflater().inflate(R.layout.view_loading_video, null); // Your own view, read class comments
+        // See all available constructors...
+        // Subscribe to standard events, such as onProgressChanged()...
+        // Your code...
+        VideoEnabledWebChromeClient webChromeClient = new VideoEnabledWebChromeClient(nonVideoLayout, videoLayout, loadingView, webView) {
+            @Override
+            public void onProgressChanged(WebView view, int progress) {
+                // Your code...
+            }
 
             @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
@@ -145,22 +157,6 @@ public class BrowserWebView {
                     }
                 }
                 return false;
-            }
-        });
-
-        View nonVideoLayout = rootView.findViewById(R.id.nonVideoLayout); // Your own view, read class comments
-        ViewGroup videoLayout = (ViewGroup) rootView.findViewById(R.id.videoLayout); // Your own view, read class comments
-        //noinspection all
-        View loadingView = activity.getLayoutInflater().inflate(R.layout.view_loading_video, null); // Your own view, read class comments
-        // See all available constructors...
-        // Subscribe to standard events, such as onProgressChanged()...
-        // Your code...
-        VideoEnabledWebChromeClient webChromeClient = new VideoEnabledWebChromeClient(nonVideoLayout, videoLayout, loadingView, webView) // See all available constructors...
-        {
-            // Subscribe to standard events, such as onProgressChanged()...
-            @Override
-            public void onProgressChanged(WebView view, int progress) {
-                // Your code...
             }
         };
         webChromeClient.setOnToggledFullscreen(new VideoEnabledWebChromeClient.ToggledFullscreenCallback() {
@@ -513,7 +509,7 @@ public class BrowserWebView {
         if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 Uri imageUri = CropImage.getPickImageResultUri(activity, data);
-                if(imageUri != null) {
+                if (imageUri != null) {
                     BrowserLogger.info("onActivityResult", "CropImage.getPickImageResultUri(activity, data)", "imageUri:" + imageUri.toString());
                 }
 
@@ -536,7 +532,7 @@ public class BrowserWebView {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == Activity.RESULT_OK) {
                 mCropImageUri = result.getUri();
-                if(mCropImageUri != null) {
+                if (mCropImageUri != null) {
                     BrowserLogger.info("onActivityResult", "result.getUri()", "mCropImageUri:" + mCropImageUri.toString());
                 }
 //                imagePath = mCropImageUri.getPath();
@@ -569,7 +565,7 @@ public class BrowserWebView {
             if (mCropImageUri != null && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // required permissions granted, start crop image activity
                 startCropImageActivity(mCropImageUri);
-                BrowserLogger.info("startCropImageActivity(mCropImageUri)" , "mCropImageUri:" + mCropImageUri.toString());
+                BrowserLogger.info("startCropImageActivity(mCropImageUri)", "mCropImageUri:" + mCropImageUri.toString());
             } else {
                 BrowserSdk.showToast(activity, "Cancelling, required permissions are not granted");
                 BrowserLogger.e("onRequestPermissionsResult()", "Cancelling, required permissions are not granted");

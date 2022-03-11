@@ -16,7 +16,7 @@ allprojects {
 [![](https://jitpack.io/v/appsfeature/browser.svg)](https://jitpack.io/#appsfeature/browser)
 ```gradle
 dependencies {
-        implementation 'com.github.appsfeature:browser:2.2'
+        implementation 'com.github.appsfeature:browser:2.3'
 }
 ```
 #### Usage  
