@@ -11,4 +11,6 @@
     <string name="message_internet_error_description">You don\'t seem to have an active internet connection.\nPlease check your connection and try again.</string>
     <string name="server_error_title">Server Error</string>
     <string name="server_error_message">The server encountered an internal error or misconfiguration and was unable to complete your request.</string>
+
+    <string name="file_provider">.fileprovider</string>
 </resources>

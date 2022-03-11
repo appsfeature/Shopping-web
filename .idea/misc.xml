@@ -4,6 +4,9 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Workspace/Appsfeature/browser/browser/src/main/res/layout/browser_layout_error.xml" value="0.22" />
+        <entry key="..\:/Workspace/DroidHelios/browser/browser-lib/src/main/res/drawable/bg_action_camera.xml" value="0.198" />
+        <entry key="..\:/Workspace/DroidHelios/browser/browser-lib/src/main/res/drawable/bg_action_folder.xml" value="0.198" />
+        <entry key="..\:/Workspace/DroidHelios/browser/browser-lib/src/main/res/layout/dialog_camera_file_chooser.xml" value="0.275" />
         <entry key="..\:/Workspace/DroidHelios/browser/browser/src/main/res/layout/browser_activity.xml" value="0.275" />
       </map>
     </option>

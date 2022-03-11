@@ -2,19 +2,25 @@ package com.browser.browser;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
+import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.ConsoleMessage;
 import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
-import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -29,16 +35,21 @@ import com.browser.BrowserSdk;
 import com.browser.R;
 import com.browser.interfaces.BrowserListener;
 import com.browser.interfaces.OverrideType;
+import com.browser.util.BrowserFileUtil;
 import com.browser.util.BrowserLogger;
 import com.browser.util.BrowserUtil;
 import com.browser.views.VideoEnabledWebChromeClient;
 import com.browser.views.VideoEnabledWebView;
 import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
+
+import java.io.File;
 
 
 public class BrowserWebView {
 
     private static final String TAG = "BrowserActivity";
+    private static final int IMAGE_CHOOSER_REQUEST_CODE = 205;
     private final Activity activity;
     private VideoEnabledWebView webView;
     private boolean isRemoveHeaderFooter = false;
@@ -49,6 +60,7 @@ public class BrowserWebView {
     private boolean isEnableExtraError = false;
     private boolean isEmbedPdf = false;
     private boolean isOpenPdfInWebView = false;
+    private Uri mfileUri;
 
     public BrowserWebView(Activity activity) {
         this.activity = activity;
@@ -144,7 +156,7 @@ public class BrowserWebView {
             @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
                 mFilePathCallback = filePathCallback;
-                openFileChooser();
+                openChooser();
                 return true;//; return super.onShowFileChooser(webView, filePathCallback, fileChooserParams);
             }
 
@@ -397,11 +409,6 @@ public class BrowserWebView {
     }
 
 
-    private void openFileChooser() {
-        CropImage.startPickImageActivity(activity);
-    }
-
-
     private void setHideGoogleTranslatorHeaderJavaScript(WebView view) {
         try {
             if (isRemoveHeaderFooter) {
@@ -468,20 +475,6 @@ public class BrowserWebView {
         return url.toLowerCase().startsWith("fb-messenger://");
     }
 
-    private Uri mCropImageUri;
-
-    private void startCropImageActivity(Uri imageUri) {
-        BrowserLogger.info("startCropImageActivity(Uri imageUri)", "imageUri:" + imageUri.toString());
-        if (isFixCropRatio) {
-            CropImage.activity(imageUri)
-                    .setAspectRatio(1, 1)
-                    .start(activity);
-        } else {
-            CropImage.activity(imageUri)
-                    .start(activity);
-        }
-    }
-
     @MainThread
     public void onPause() {
         webView.onPause();
@@ -506,13 +499,12 @@ public class BrowserWebView {
 
     @MainThread
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                Uri imageUri = CropImage.getPickImageResultUri(activity, data);
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == IMAGE_CHOOSER_REQUEST_CODE) {
+                Uri imageUri = mfileUri;
                 if (imageUri != null) {
                     BrowserLogger.info("onActivityResult", "CropImage.getPickImageResultUri(activity, data)", "imageUri:" + imageUri.toString());
                 }
-
                 // For API >= 23 we need to check specifically that we have permissions to read external storage.
                 if (CropImage.isReadExternalStoragePermissionsRequired(activity, imageUri)) {
                     // request permissions and handle the result in onRequestPermissionsResult()
@@ -524,29 +516,41 @@ public class BrowserWebView {
                     // no permissions required or already grunted, can start crop image activity
                     startCropImageActivity(imageUri);
                 }
-            } else {
-                mFilePathCallback.onReceiveValue(null);
-                BrowserLogger.e("onActivityResult", "resultCode : Activity.RESULT_CANCELED");
-            }
-        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-            CropImage.ActivityResult result = CropImage.getActivityResult(data);
-            if (resultCode == Activity.RESULT_OK) {
+
+            } else if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE) {
+                Uri imageUri = CropImage.getPickImageResultUri(activity, data);
+                if (imageUri != null) {
+                    BrowserLogger.info("onActivityResult", "CropImage.getPickImageResultUri(activity, data)", "imageUri:" + imageUri.toString());
+                }
+                // For API >= 23 we need to check specifically that we have permissions to read external storage.
+                if (CropImage.isReadExternalStoragePermissionsRequired(activity, imageUri)) {
+                    // request permissions and handle the result in onRequestPermissionsResult()
+                    mCropImageUri = imageUri;
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+                        activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, CropImage.PICK_IMAGE_PERMISSIONS_REQUEST_CODE);
+                    }
+                } else {
+                    // no permissions required or already grunted, can start crop image activity
+                    startCropImageActivity(imageUri);
+                }
+
+            } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+                CropImage.ActivityResult result = CropImage.getActivityResult(data);
                 mCropImageUri = result.getUri();
                 if (mCropImageUri != null) {
                     BrowserLogger.info("onActivityResult", "result.getUri()", "mCropImageUri:" + mCropImageUri.toString());
                 }
 //                imagePath = mCropImageUri.getPath();
 //                setImage(mCropImageUri.toString());
-                mFilePathCallback.onReceiveValue(new Uri[]{mCropImageUri});
-            } else {
-                mFilePathCallback.onReceiveValue(null);
-                BrowserLogger.e("onActivityResult", "resultCode" + requestCode);
+                if (mFilePathCallback != null) {
+                    mFilePathCallback.onReceiveValue(new Uri[]{mCropImageUri});
+                }
             }
         } else {
-            if (resultCode == Activity.RESULT_CANCELED) {
+            if (mFilePathCallback != null) {
                 mFilePathCallback.onReceiveValue(null);
-                BrowserLogger.e("onActivityResult", "resultCode : Activity.RESULT_CANCELED");
             }
+            BrowserLogger.e("onActivityResult", "resultCode : Activity.RESULT_CANCELED");
         }
     }
 
@@ -570,6 +574,86 @@ public class BrowserWebView {
                 BrowserSdk.showToast(activity, "Cancelling, required permissions are not granted");
                 BrowserLogger.e("onRequestPermissionsResult()", "Cancelling, required permissions are not granted");
             }
+        }
+    }
+
+
+    private void openChooser() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        View dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_camera_file_chooser, null);
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+        AlertDialog dialog = builder.create();
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.show();
+        (dialogView.findViewById(R.id.ll_camera)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+                openCamera();
+            }
+        });
+        (dialogView.findViewById(R.id.ll_folder)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+                openFileChooser();
+            }
+        });
+        (dialogView.findViewById(R.id.iv_close)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+                if (mFilePathCallback != null) {
+                    mFilePathCallback.onReceiveValue(null);
+                }
+            }
+        });
+    }
+
+    private void openFileChooser() {
+        try {
+            Intent cameraIntent = CropImage.getPickImageChooserIntent(
+                    activity, activity.getString(R.string.pick_image_intent_chooser_title), false, false);
+            cameraIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            activity.startActivityForResult(cameraIntent, CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void openCamera() {
+        try {
+            File file = BrowserFileUtil.getFile(activity, "sampleCamera.png");
+            mfileUri = BrowserFileUtil.getUriFromFile(activity, file);
+            Intent cameraIntent = CropImage.getCameraIntent(activity, mfileUri);
+            cameraIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            activity.startActivityForResult(cameraIntent, IMAGE_CHOOSER_REQUEST_CODE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Uri mCropImageUri;
+
+    private void startCropImageActivity(Uri imageUri) {
+        BrowserLogger.info("startCropImageActivity(Uri imageUri)", "imageUri:" + imageUri.toString());
+        if (isFixCropRatio) {
+            CropImage.activity(imageUri)
+                    .setAspectRatio(1, 1)
+                    .setGuidelines(CropImageView.Guidelines.ON)
+                    .setCropShape(CropImageView.CropShape.OVAL)
+                    .start(activity);
+        } else {
+            CropImage.activity(imageUri)
+                    .start(activity);
         }
     }
 }
