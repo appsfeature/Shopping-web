@@ -9,6 +9,8 @@ public interface BrowserConstant {
 //    String URL_GOOGLE_DOC_VIEWER = "https://docs.google.com/viewer?url=" ;
     String IS_REMOVE_HEADER_FOOTER = "is_remove_header_footer";
     String IS_ENABLE_EXTRA_ERROR = "isEnableExtraError";
+    String IS_FIX_CROP_RATIO = "isFixCropRatio";
+    String IS_DISABLE_BACK_BUTTON_HISTORY = "isDisableBackButtonHistory";
 
     String WEB_VIEW_URL = "webViewUrl";
     String TITLE = "title";

@@ -36,6 +36,7 @@ public class BrowserSdk {
     private BrowserCallback mCallback;
     private final List<String> urlOverloadingList = new ArrayList<>();
     private boolean isEnableDebugMode = false;
+    private int mCameraCompressQuality = 20;
 
     public List<String> getUrlOverloadingList() {
         return urlOverloadingList;
@@ -84,30 +85,11 @@ public class BrowserSdk {
     }
 
     public static void open(Context context, String title, String webUrl, boolean isEmbedPdf, boolean isRemoveHeaderFooter) {
-        try {
-            Intent intent = new Intent(context, BrowserActivity.class);
-            intent.putExtra(BrowserConstant.WEB_VIEW_URL, webUrl);
-            intent.putExtra(BrowserConstant.TITLE, title);
-            intent.putExtra(BrowserConstant.IS_EMBED_PDF, isEmbedPdf);
-            intent.putExtra(BrowserConstant.IS_REMOVE_HEADER_FOOTER, isRemoveHeaderFooter);
-            context.startActivity(intent);
-        } catch (Exception e) {
-            e.printStackTrace();
-            BrowserSdk.showToast(context, "No option available for take action.");
-        }
+        BrowserClassUtil.open(context, title, webUrl, isEmbedPdf, isRemoveHeaderFooter);
     }
 
     public static void openPDFViewer(Context context, String title, String webUrl) {
-        try {
-            Intent intent = new Intent(context, BrowserActivity.class);
-            intent.putExtra(BrowserConstant.WEB_VIEW_URL, webUrl);
-            intent.putExtra(BrowserConstant.TITLE, title);
-            intent.putExtra(BrowserConstant.IS_OPEN_PDF_IN_WEBVIEW, true);
-            context.startActivity(intent);
-        } catch (Exception e) {
-            e.printStackTrace();
-            BrowserSdk.showToast(context, "No option available for take action.");
-        }
+        BrowserClassUtil.openPDFViewer(context, title, webUrl);
     }
 
     public static void hideKeyboard(Activity activity) {
@@ -243,6 +225,19 @@ public class BrowserSdk {
 
     public BrowserSdk setEnableInternetErrorViewOnly(Context context, boolean isEnable) {
         BrowserPreferences.setEnableInternetErrorViewOnly(context, isEnable);
+        return this;
+    }
+
+    /**
+     * @apiNote :the quality (if applicable) to use when writing the image (0 - 100).
+     * Default: 20
+     */
+    public int getCameraCompressQuality() {
+        return mCameraCompressQuality;
+    }
+
+    public BrowserSdk setCameraCompressQuality(int cameraCompressQuality) {
+        this.mCameraCompressQuality = cameraCompressQuality;
         return this;
     }
 }

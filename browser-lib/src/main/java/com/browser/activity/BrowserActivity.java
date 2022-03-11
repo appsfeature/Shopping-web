@@ -25,6 +25,8 @@ public class BrowserActivity extends BaseToolbarActivity {
     private String url, title;
     private boolean isRemoveHeaderFooter;
     private boolean isEnableExtraError;
+    private boolean isFixCropRatio;
+    private boolean isDisableBackButtonHistory;
     private boolean isEmbedPdf;
     private boolean isOpenPdfInWebView;
 
@@ -44,27 +46,29 @@ public class BrowserActivity extends BaseToolbarActivity {
     private void loadUi() {
         progressBar = findViewById(com.browser.R.id.progressBar);
 
-        webView = new BrowserWebView(this);
-        webView.init(this);
-        webView.setRemoveHeaderFooter(isRemoveHeaderFooter);
-        webView.setEnableExtraError(isEnableExtraError);
-        webView.setEmbedPDF(isEmbedPdf);
-        webView.setOpenPdfInWebView(isOpenPdfInWebView);
-        webView.addBrowserListener(new BrowserListener() {
-            @Override
-            public void onToolbarVisibilityUpdate(int isVisible) {
-                if (toolbar != null) {
-                    toolbar.setVisibility(isVisible);
-                }
-            }
+        webView = new BrowserWebView(this)
+                .init(this)
+                .setRemoveHeaderFooter(isRemoveHeaderFooter)
+                .setEnableExtraError(isEnableExtraError)
+                .setFixCropRatio(isFixCropRatio)
+                .setEmbedPDF(isEmbedPdf)
+                .setOpenPdfInWebView(isOpenPdfInWebView)
+                .setDisableBackButtonHistory(isDisableBackButtonHistory)
+                .addBrowserListener(new BrowserListener() {
+                    @Override
+                    public void onToolbarVisibilityUpdate(int isVisible) {
+                        if (toolbar != null) {
+                            toolbar.setVisibility(isVisible);
+                        }
+                    }
 
-            @Override
-            public void onProgressBarUpdate(int isVisible) {
-                if (progressBar != null) {
-                    progressBar.setVisibility(isVisible);
-                }
-            }
-        });
+                    @Override
+                    public void onProgressBarUpdate(int isVisible) {
+                        if (progressBar != null) {
+                            progressBar.setVisibility(isVisible);
+                        }
+                    }
+                });
 
         if (TextUtils.isEmpty(url)) {
             BrowserSdk.showToast(this, "Invalid Url");
@@ -95,6 +99,12 @@ public class BrowserActivity extends BaseToolbarActivity {
         if (intent.hasExtra(BrowserConstant.IS_ENABLE_EXTRA_ERROR)) {
             isEnableExtraError = intent.getBooleanExtra(BrowserConstant.IS_ENABLE_EXTRA_ERROR, false);
         }
+        if (intent.hasExtra(BrowserConstant.IS_FIX_CROP_RATIO)) {
+            isFixCropRatio = intent.getBooleanExtra(BrowserConstant.IS_FIX_CROP_RATIO, false);
+        }
+        if (intent.hasExtra(BrowserConstant.IS_DISABLE_BACK_BUTTON_HISTORY)) {
+            isDisableBackButtonHistory = intent.getBooleanExtra(BrowserConstant.IS_DISABLE_BACK_BUTTON_HISTORY, false);
+        }
     }
 
     private void setupToolbar() {
@@ -106,7 +116,7 @@ public class BrowserActivity extends BaseToolbarActivity {
                 getSupportActionBar().setTitle(title);
                 toolbar.setVisibility(View.VISIBLE);
             }
-        }else {
+        } else {
             toolbar.setVisibility(View.GONE);
         }
     }
@@ -135,7 +145,7 @@ public class BrowserActivity extends BaseToolbarActivity {
 
     @Override
     public void onBackPressed() {
-        if(webView.isWebViewClosedAllPages()) {
+        if (webView.isWebViewClosedAllPages()) {
             super.onBackPressed();
         }
     }

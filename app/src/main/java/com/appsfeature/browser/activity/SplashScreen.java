@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 
 import com.appsfeature.browser.util.AppConstant;
+import com.browser.BrowserClassUtil;
 import com.browser.BrowserSdk;
 
 
@@ -26,7 +27,7 @@ public class SplashScreen extends Activity {
 		new Handler().postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				BrowserSdk.open(SplashScreen.this, "Live Tv", AppConstant.BASE_URL, false);
+				BrowserClassUtil.openProfileLink(SplashScreen.this, "Live Tv", AppConstant.BASE_URL);
 //				startActivity(new Intent(SplashScreen.this, BrowserCustomActivity.class));
 				finish();
 			}

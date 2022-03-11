@@ -3,7 +3,6 @@ package com.browser.browser;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -11,7 +10,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
-import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,7 +47,7 @@ import java.io.File;
 public class BrowserWebView {
 
     private static final String TAG = "BrowserActivity";
-    private static final int IMAGE_CHOOSER_REQUEST_CODE = 205;
+    private static final int CAMERA_REQUEST_CODE = 205;
     private static final int FILE_CHOOSER_REQUEST_CODE = 206;
     private final Activity activity;
     private VideoEnabledWebView webView;
@@ -61,6 +59,7 @@ public class BrowserWebView {
     private boolean isEnableExtraError = false;
     private boolean isEmbedPdf = false;
     private boolean isOpenPdfInWebView = false;
+    private boolean isDisableBackButtonHistory = false;
     private Uri mfileUri;
 
     public BrowserWebView(Activity activity) {
@@ -101,12 +100,18 @@ public class BrowserWebView {
         return this;
     }
 
+    public BrowserWebView setDisableBackButtonHistory(boolean disableBackButtonHistory) {
+        isDisableBackButtonHistory = disableBackButtonHistory;
+        return this;
+    }
+
     private ValueCallback<Uri[]> mFilePathCallback;
 
 
-    public void init(Activity activity) {
+    public BrowserWebView init(Activity activity) {
         View rootView = activity.getWindow().getDecorView().getRootView();
         initView(rootView);
+        return this;
     }
 
     public void init(View view) {
@@ -490,7 +495,7 @@ public class BrowserWebView {
 
     @MainThread
     public boolean isWebViewClosedAllPages() {
-        if (webView != null && webView.canGoBack()) {
+        if (!isDisableBackButtonHistory && webView != null && webView.canGoBack()) {
             webView.goBack();
             return false;
         } else {
@@ -501,7 +506,7 @@ public class BrowserWebView {
     @MainThread
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == IMAGE_CHOOSER_REQUEST_CODE) {
+            if (requestCode == CAMERA_REQUEST_CODE) {
                 Uri imageUri = mfileUri;
                 if (imageUri != null) {
                     BrowserLogger.info("onActivityResult", "CropImage.getPickImageResultUri(activity, data)", "imageUri:" + imageUri.toString());
@@ -515,7 +520,7 @@ public class BrowserWebView {
                     }
                 } else {
                     // no permissions required or already grunted, can start crop image activity
-                    startCropImageActivity(imageUri);
+                    startCropImageActivity(imageUri, BrowserSdk.getInstance().getCameraCompressQuality());
                 }
 
             } else if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE) {
@@ -532,7 +537,7 @@ public class BrowserWebView {
                     }
                 } else {
                     // no permissions required or already grunted, can start crop image activity
-                    startCropImageActivity(imageUri);
+                    startCropImageActivity(imageUri, 90);
                 }
 
             } else if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
@@ -578,7 +583,7 @@ public class BrowserWebView {
         if (requestCode == CropImage.PICK_IMAGE_PERMISSIONS_REQUEST_CODE) {
             if (mCropImageUri != null && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // required permissions granted, start crop image activity
-                startCropImageActivity(mCropImageUri);
+                startCropImageActivity(mCropImageUri, 90);
                 BrowserLogger.info("startCropImageActivity(mCropImageUri)", "mCropImageUri:" + mCropImageUri.toString());
             } else {
                 BrowserSdk.showToast(activity, "Cancelling, required permissions are not granted");
@@ -631,7 +636,7 @@ public class BrowserWebView {
             mfileUri = BrowserFileUtil.getUriFromFile(activity, file);
             Intent cameraIntent = CropImage.getCameraIntent(activity, mfileUri);
             cameraIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            activity.startActivityForResult(cameraIntent, IMAGE_CHOOSER_REQUEST_CODE);
+            activity.startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -683,16 +688,18 @@ public class BrowserWebView {
 
     private Uri mCropImageUri;
 
-    private void startCropImageActivity(Uri imageUri) {
+    private void startCropImageActivity(Uri imageUri, int quality) {
         BrowserLogger.info("startCropImageActivity(Uri imageUri)", "imageUri:" + imageUri.toString());
         if (isFixCropRatio) {
             CropImage.activity(imageUri)
+                    .setOutputCompressQuality(quality)
                     .setAspectRatio(1, 1)
                     .setGuidelines(CropImageView.Guidelines.ON)
                     .setCropShape(CropImageView.CropShape.OVAL)
                     .start(activity);
         } else {
             CropImage.activity(imageUri)
+                    .setOutputCompressQuality(quality)
                     .start(activity);
         }
     }
