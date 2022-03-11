@@ -50,6 +50,7 @@ public class BrowserWebView {
 
     private static final String TAG = "BrowserActivity";
     private static final int IMAGE_CHOOSER_REQUEST_CODE = 205;
+    private static final int FILE_CHOOSER_REQUEST_CODE = 206;
     private final Activity activity;
     private VideoEnabledWebView webView;
     private boolean isRemoveHeaderFooter = false;
@@ -534,6 +535,15 @@ public class BrowserWebView {
                     startCropImageActivity(imageUri);
                 }
 
+            } else if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
+                Uri fileUri = CropImage.getPickImageResultUri(activity, data);
+                if (fileUri != null) {
+                    BrowserLogger.info("onActivityResult", "CropImage.getPickImageResultUri(activity, data)", "imageUri:" + fileUri.toString());
+                }
+                if (mFilePathCallback != null) {
+                    mFilePathCallback.onReceiveValue(new Uri[]{fileUri});
+                }
+
             } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
                 CropImage.ActivityResult result = CropImage.getActivityResult(data);
                 mCropImageUri = result.getUri();
@@ -587,38 +597,47 @@ public class BrowserWebView {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.show();
-        (dialogView.findViewById(R.id.ll_camera)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
-                openCamera();
+        (dialogView.findViewById(R.id.ll_camera)).setOnClickListener(v -> {
+            if (dialog != null) {
+                dialog.dismiss();
             }
+            openCamera();
         });
-        (dialogView.findViewById(R.id.ll_folder)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
-                openFileChooser();
+        (dialogView.findViewById(R.id.ll_gallery)).setOnClickListener(v -> {
+            if (dialog != null) {
+                dialog.dismiss();
             }
+            openGallery();
         });
-        (dialogView.findViewById(R.id.iv_close)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
-                if (mFilePathCallback != null) {
-                    mFilePathCallback.onReceiveValue(null);
-                }
+        (dialogView.findViewById(R.id.ll_folder)).setOnClickListener(v -> {
+            if (dialog != null) {
+                dialog.dismiss();
+            }
+            openFileChooser();
+        });
+        (dialogView.findViewById(R.id.iv_close)).setOnClickListener(v -> {
+            if (dialog != null) {
+                dialog.dismiss();
+            }
+            if (mFilePathCallback != null) {
+                mFilePathCallback.onReceiveValue(null);
             }
         });
     }
 
-    private void openFileChooser() {
+    private void openCamera() {
+        try {
+            File file = BrowserFileUtil.getFile(activity, "sampleCamera.png");
+            mfileUri = BrowserFileUtil.getUriFromFile(activity, file);
+            Intent cameraIntent = CropImage.getCameraIntent(activity, mfileUri);
+            cameraIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            activity.startActivityForResult(cameraIntent, IMAGE_CHOOSER_REQUEST_CODE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void openGallery() {
         try {
             Intent cameraIntent = CropImage.getPickImageChooserIntent(
                     activity, activity.getString(R.string.pick_image_intent_chooser_title), false, false);
@@ -629,13 +648,34 @@ public class BrowserWebView {
         }
     }
 
-    private void openCamera() {
+    private void openFileChooser() {
         try {
-            File file = BrowserFileUtil.getFile(activity, "sampleCamera.png");
-            mfileUri = BrowserFileUtil.getUriFromFile(activity, file);
-            Intent cameraIntent = CropImage.getCameraIntent(activity, mfileUri);
-            cameraIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            activity.startActivityForResult(cameraIntent, IMAGE_CHOOSER_REQUEST_CODE);
+            String[] mimeTypes = new String[]{"image/jpeg", "image/png", "image/gif", "application/pdf"};
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                intent.setType(mimeTypes.length == 1 ? mimeTypes[0] : "*/*");
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+            } else {
+                intent.setType("*/*");
+            }
+            activity.startActivityForResult(Intent.createChooser(intent, "Choose file"), FILE_CHOOSER_REQUEST_CODE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void openFileChooser2() {
+        try {
+//            Intent fileIntent = CropImage.getPickImageChooserIntent(
+//                    activity, activity.getString(R.string.pick_image_intent_chooser_title), true, false);
+//            fileIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//            fileIntent.setType("*/*");
+            Intent fileIntent = new Intent(Intent.ACTION_GET_CONTENT);
+            fileIntent.setType("*/*");
+            Intent chooserIntent = Intent.createChooser(fileIntent, "Select File");
+            activity.startActivityForResult(chooserIntent, FILE_CHOOSER_REQUEST_CODE);
         } catch (Exception e) {
             e.printStackTrace();
         }
