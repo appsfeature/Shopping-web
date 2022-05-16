@@ -1,13 +1,16 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
+
 
 android {
     flavorDimensions "default"
-    compileSdkVersion 30
+    compileSdk 31
 
     defaultConfig {
         applicationId "com.appsfeature.shoppingsample"
-        minSdkVersion 16
-        targetSdkVersion 30
+        minSdk 19
+        targetSdk 31
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
