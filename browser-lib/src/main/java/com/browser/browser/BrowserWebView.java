@@ -464,7 +464,7 @@ public class BrowserWebView {
      * @param url tg:msg_url?url=
      */
     private boolean isUrlTelegramType(String url) {
-        return url.toLowerCase().startsWith("tg:msg_url");
+        return url.toLowerCase().startsWith("tg:msg_url") || url.toLowerCase().startsWith("tg:join");
     }
 
     /**
