@@ -114,16 +114,18 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 
 import com.browser.BrowserSdk;
-import com.browser.activity.BaseToolbarActivity;
+import com.browser.R;
 import com.browser.browser.BrowserWebView;
 import com.browser.interfaces.BrowserListener;
 import com.browser.util.BrowserConstant;
+
 
 public class AppBrowserActivity extends BaseToolbarActivity {
 
@@ -131,33 +133,52 @@ public class AppBrowserActivity extends BaseToolbarActivity {
     private Toolbar toolbar;
     private BrowserWebView webView;
     private String url, title;
+    private boolean isRemoveHeaderFooter;
+    private boolean isEnableExtraError;
+    private boolean isFixCropRatio;
+    private boolean isDisableBackButtonHistory;
+    private boolean isEmbedPdf;
+    private boolean isOpenPdfInWebView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.browser_activity);
-        setupToolbar();
-        initDataFromIntent();
 
+        initDataFromIntent();
+        setupToolbar();
+
+        BrowserSdk.loadBanner(findViewById(R.id.rlBannerAds), this);
+
+        loadUi();
+    }
+
+    private void loadUi() {
         progressBar = findViewById(com.browser.R.id.progressBar);
 
-        webView = new BrowserWebView(this);
-        webView.init(this);
-        webView.addBrowserListener(new BrowserListener() {
-            @Override
-            public void onToolbarVisibilityUpdate(int isVisible) {
-                if (toolbar != null) {
-                    toolbar.setVisibility(isVisible);
-                }
-            }
+        webView = new BrowserWebView(this)
+                .init(this)
+                .setRemoveHeaderFooter(isRemoveHeaderFooter)
+                .setEnableExtraError(isEnableExtraError)
+                .setFixCropRatio(isFixCropRatio)
+                .setEmbedPDF(isEmbedPdf)
+                .setOpenPdfInWebView(isOpenPdfInWebView)
+                .setDisableBackButtonHistory(isDisableBackButtonHistory)
+                .addBrowserListener(new BrowserListener() {
+                    @Override
+                    public void onToolbarVisibilityUpdate(int isVisible) {
+                        if (toolbar != null) {
+                            toolbar.setVisibility(isVisible);
+                        }
+                    }
 
-            @Override
-            public void onProgressBarUpdate(int isVisible) {
-                if (progressBar != null) {
-                    progressBar.setVisibility(isVisible);
-                }
-            }
-        });
+                    @Override
+                    public void onProgressBarUpdate(int isVisible) {
+                        if (progressBar != null) {
+                            progressBar.setVisibility(isVisible);
+                        }
+                    }
+                });
 
         if (TextUtils.isEmpty(url)) {
             BrowserSdk.showToast(this, "Invalid Url");
@@ -166,6 +187,7 @@ public class AppBrowserActivity extends BaseToolbarActivity {
         }
         webView.loadUrl(url);
     }
+
     private void initDataFromIntent() {
         Intent intent = getIntent();
 
@@ -175,16 +197,37 @@ public class AppBrowserActivity extends BaseToolbarActivity {
         if (intent.hasExtra(BrowserConstant.TITLE)) {
             title = intent.getStringExtra(BrowserConstant.TITLE);
         }
+        if (intent.hasExtra(BrowserConstant.IS_REMOVE_HEADER_FOOTER)) {
+            isRemoveHeaderFooter = intent.getBooleanExtra(BrowserConstant.IS_REMOVE_HEADER_FOOTER, false);
+        }
+        if (intent.hasExtra(BrowserConstant.IS_EMBED_PDF)) {
+            isEmbedPdf = intent.getBooleanExtra(BrowserConstant.IS_EMBED_PDF, false);
+        }
+        if (intent.hasExtra(BrowserConstant.IS_OPEN_PDF_IN_WEBVIEW)) {
+            isOpenPdfInWebView = intent.getBooleanExtra(BrowserConstant.IS_OPEN_PDF_IN_WEBVIEW, false);
+        }
+        if (intent.hasExtra(BrowserConstant.IS_ENABLE_EXTRA_ERROR)) {
+            isEnableExtraError = intent.getBooleanExtra(BrowserConstant.IS_ENABLE_EXTRA_ERROR, false);
+        }
+        if (intent.hasExtra(BrowserConstant.IS_FIX_CROP_RATIO)) {
+            isFixCropRatio = intent.getBooleanExtra(BrowserConstant.IS_FIX_CROP_RATIO, false);
+        }
+        if (intent.hasExtra(BrowserConstant.IS_DISABLE_BACK_BUTTON_HISTORY)) {
+            isDisableBackButtonHistory = intent.getBooleanExtra(BrowserConstant.IS_DISABLE_BACK_BUTTON_HISTORY, false);
+        }
     }
 
     private void setupToolbar() {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            if (title != null) {
+        if (!TextUtils.isEmpty(title)) {
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                 getSupportActionBar().setTitle(title);
+                toolbar.setVisibility(View.VISIBLE);
             }
+        } else {
+            toolbar.setVisibility(View.GONE);
         }
     }
 
@@ -212,7 +255,7 @@ public class AppBrowserActivity extends BaseToolbarActivity {
 
     @Override
     public void onBackPressed() {
-        if(webView.isWebViewClosedAllPages()) {
+        if (webView.isWebViewClosedAllPages()) {
             super.onBackPressed();
         }
     }
