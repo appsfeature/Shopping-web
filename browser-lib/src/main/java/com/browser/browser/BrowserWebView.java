@@ -87,7 +87,7 @@ public class BrowserWebView {
     }
 
     public boolean isEnableExtraError() {
-        return isEnableExtraError;
+        return BrowserSdk.getInstance().isEnableErrorLayoutOverlay() && isEnableExtraError;
     }
 
     public BrowserWebView setEnableExtraError(boolean enableExtraError) {
@@ -329,7 +329,7 @@ public class BrowserWebView {
                         e.printStackTrace();
                     }
                 }
-                if (isEnableExtraError) {
+                if (isEnableExtraError()) {
                     updateErrorUi(true, errorDetail);
                 }
                 super.onReceivedHttpError(view, request, errorResponse);
@@ -346,7 +346,7 @@ public class BrowserWebView {
                         e.printStackTrace();
                     }
                 }
-                if (isEnableExtraError) {
+                if (isEnableExtraError()) {
                     updateErrorUi(true, errorDetail);
                 }
                 super.onReceivedSslError(view, handler, error);
@@ -362,7 +362,9 @@ public class BrowserWebView {
                     }
                 }
                 String errorDetail = description + "\n\n" + failingUrl;
-                updateErrorUi(true, errorDetail);
+                if (isEnableExtraError()) {
+                    updateErrorUi(true, errorDetail);
+                }
                 BrowserSdk.getInstance().dispatchUrlOverloadingListener(view, "", OverrideType.ReceivedError);
                 super.onReceivedError(view, errorCode, description, failingUrl);
             }
@@ -378,7 +380,9 @@ public class BrowserWebView {
                         e.printStackTrace();
                     }
                 }
-                updateErrorUi(true, errorDetail);
+                if (isEnableExtraError()) {
+                    updateErrorUi(true, errorDetail);
+                }
                 BrowserSdk.getInstance().dispatchUrlOverloadingListener(view, "", OverrideType.ReceivedError);
                 super.onReceivedError(view, request, error);
             }

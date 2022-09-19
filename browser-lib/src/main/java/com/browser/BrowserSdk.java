@@ -17,11 +17,9 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.browser.activity.BrowserActivity;
 import com.browser.interfaces.BrowserCallback;
 import com.browser.interfaces.OverrideType;
 import com.browser.interfaces.UrlOverloadingListener;
-import com.browser.util.BrowserConstant;
 import com.browser.util.BrowserPreferences;
 
 import java.net.URISyntaxException;
@@ -37,6 +35,7 @@ public class BrowserSdk {
     private final List<String> urlOverloadingList = new ArrayList<>();
     private boolean isEnableDebugMode = false;
     private int mCameraCompressQuality = 20;
+    private boolean isEnableErrorLayoutOverlay = true;
 
     public List<String> getUrlOverloadingList() {
         return urlOverloadingList;
@@ -238,6 +237,15 @@ public class BrowserSdk {
 
     public BrowserSdk setCameraCompressQuality(int cameraCompressQuality) {
         this.mCameraCompressQuality = cameraCompressQuality;
+        return this;
+    }
+
+    public boolean isEnableErrorLayoutOverlay() {
+        return isEnableErrorLayoutOverlay;
+    }
+
+    public BrowserSdk setEnableErrorLayoutOverlay(boolean enableExtraError) {
+        this.isEnableErrorLayoutOverlay = enableExtraError;
         return this;
     }
 }

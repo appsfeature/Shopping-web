@@ -31,6 +31,7 @@ public class AppApplication extends Application {
                 .setDebugMode(BuildConfig.DEBUG)
                 .setEnableDeveloperMode(this, false)
                 .setEnableInternetErrorViewOnly(this, false)
+                .setEnableErrorLayoutOverlay(true)
                 .addUrlOverloadingListener(this.hashCode(), urlOverloadingList, new UrlOverloadingListener() {
                     @Override
                     public void onOverrideUrlLoading(WebView view, String url) {
