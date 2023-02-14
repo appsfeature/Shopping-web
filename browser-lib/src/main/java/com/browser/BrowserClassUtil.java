@@ -1,10 +1,14 @@
 package com.browser;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 
 import com.browser.activity.BrowserActivity;
 import com.browser.util.BrowserConstant;
+
+import java.net.URISyntaxException;
 
 public class BrowserClassUtil {
 
@@ -65,6 +69,26 @@ public class BrowserClassUtil {
         } catch (Exception e) {
             e.printStackTrace();
             BrowserSdk.showToast(context, "No option available for take action.");
+        }
+    }
+
+    public static void openIntentUrl(Context context, String url) {
+        try {
+            Intent intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+            context.startActivity(intent);
+        } catch (URISyntaxException | ActivityNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    static void openUrlExternal(Context context, String url) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

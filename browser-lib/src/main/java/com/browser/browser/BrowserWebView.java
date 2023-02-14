@@ -1,6 +1,7 @@
 package com.browser.browser;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -135,6 +136,7 @@ public class BrowserWebView {
         BrowserLogger.d("loadUrl()", url);
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private void initView(View rootView) {
         webView = rootView.findViewById(R.id.webView);
         layoutInternetError = rootView.findViewById(R.id.layout_internet_error);
@@ -396,12 +398,12 @@ public class BrowserWebView {
         webView.getSettings().setSupportMultipleWindows(false);
         webView.getSettings().setDomStorageEnabled(true);
         webView.getSettings().setBuiltInZoomControls(false);
-        webView.getSettings().setAppCacheEnabled(true);
+//        webView.getSettings().setAppCacheEnabled(true);
         webView.getSettings().setLoadWithOverviewMode(true);
 //        webView.getSettings().setUseWideViewPort(true);
         webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
-        webView.getSettings().setAppCachePath(activity.getApplicationContext()
-                .getCacheDir().getAbsolutePath());
+//        webView.getSettings().setAppCachePath(activity.getApplicationContext()
+//                .getCacheDir().getAbsolutePath());
     }
 
     private void openPDF(String mUrl) {

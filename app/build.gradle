@@ -5,12 +5,12 @@ plugins {
 
 android {
     flavorDimensions "default"
-    compileSdk 31
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.appsfeature.shoppingsample"
         minSdk 19
-        targetSdk 31
+        targetSdk 33
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
@@ -53,10 +53,6 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$rootProject.ext.appcompat"
     implementation "com.google.android.material:material:$rootProject.ext.material"
     implementation project(path: ':browser-lib')
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-
 
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
 
