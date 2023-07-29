@@ -14,7 +14,7 @@
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
         android:theme="@style/AppTheme.NoActionBar">
-        <activity android:name="com.appsfeature.browser.activity.SplashScreen"
+        <activity android:name="com.appsfeature.browser.activity.MainActivity"
             android:exported="true"
             android:theme="@style/AppTheme.Splash">
             <intent-filter>
