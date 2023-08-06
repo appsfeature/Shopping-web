@@ -9,6 +9,7 @@ import android.widget.RelativeLayout;
 import com.browser.activity.BrowserSdkClass;
 import com.browser.interfaces.BrowserCallback;
 import com.browser.interfaces.UrlOverloadingListener;
+import com.browser.player.VideoProperty;
 import com.browser.util.BrowserUtil;
 
 import java.util.List;
@@ -73,6 +74,14 @@ public interface BrowserSdk {
 
     static void open(Context context, String title, String webUrl, boolean isEmbedPdf, boolean isRemoveHeaderFooter) {
         BrowserClassUtil.open(context, title, webUrl, isEmbedPdf, isRemoveHeaderFooter);
+    }
+
+    static void openVideoPlayer(Context context, String videoId, String videoTitle) {
+        BrowserClassUtil.openVideoPlayer(context, videoId, videoTitle);
+    }
+
+    static void openVideoPlayer(Context context, VideoProperty videoProperty) {
+        BrowserClassUtil.openVideoPlayer(context, videoProperty);
     }
 
     static void openPDFViewer(Context context, String title, String webUrl) {

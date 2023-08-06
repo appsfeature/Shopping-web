@@ -29,6 +29,13 @@
             android:exported="true"
             android:configChanges="orientation|screenSize"/>
 
+
+        <activity
+            android:name=".player.YTPlayerActivity"
+            android:theme="@style/Browser.NoActionBar"
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
+            android:exported="false"/>
+
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat"

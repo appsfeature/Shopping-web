@@ -8,6 +8,7 @@ import android.os.Looper;
 
 import com.appsfeature.browser.util.AppConstant;
 import com.browser.BrowserClassUtil;
+import com.browser.BrowserSdk;
 
 
 public class MainActivity extends Activity {
@@ -26,7 +27,8 @@ public class MainActivity extends Activity {
 		new Handler(Looper.myLooper()).postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				BrowserClassUtil.openProfileLink(MainActivity.this, "Live Tv", AppConstant.BASE_URL);
+//				BrowserClassUtil.openProfileLink(MainActivity.this, "Live Tv", AppConstant.BASE_URL);
+				BrowserSdk.openVideoPlayer(MainActivity.this, "7PIji8OubXU", "Live Tv");
 //				startActivity(new Intent(SplashScreen.this, BrowserCustomActivity.class));
 				finish();
 			}

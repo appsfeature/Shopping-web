@@ -17,4 +17,7 @@ public interface BrowserConstant {
     String IS_EMBED_PDF = "is_embed_pdf";
     String IS_OPEN_PDF_IN_WEBVIEW = "is_open_pdf_in_webview";
     String ERROR_MESSAGE_INVALID_URL = "Invalid Url";
+    String EXTRA_PROPERTY = "extra_property";
+    String INVALID_PROPERTY = "Error-001: Invalid property";
+
 }

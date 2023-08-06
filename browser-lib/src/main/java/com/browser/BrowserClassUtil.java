@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.net.Uri;
 
 import com.browser.activity.BrowserActivity;
+import com.browser.player.VideoProperty;
+import com.browser.player.YTPlayerActivity;
 import com.browser.util.BrowserConstant;
 
 import java.net.URISyntaxException;
@@ -38,6 +40,22 @@ public class BrowserClassUtil {
         }
     }
 
+    public static void openVideoPlayer(Context context, String videoId, String videoTitle) {
+        VideoProperty property = new VideoProperty();
+        property.setVideoId(videoId);
+        property.setVideoTitle(videoTitle);
+        openVideoPlayer(context, property);
+    }
+    public static void openVideoPlayer(Context context, VideoProperty extraProperty) {
+        try {
+            context.startActivity(new Intent(context, YTPlayerActivity.class)
+                    .putExtra(BrowserConstant.EXTRA_PROPERTY, extraProperty)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void openPDFViewer(Context context, String title, String webUrl) {
         try {
             Intent intent = new Intent(context, BrowserActivity.class);
@@ -50,6 +68,7 @@ public class BrowserClassUtil {
             BrowserSdk.showToast(context, "No option available for take action.");
         }
     }
+
 
     public static void openProfileLink(Context context, String title, String webUrl) {
         openLinkWithoutHistory(context, title, webUrl);

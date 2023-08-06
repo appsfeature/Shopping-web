@@ -8,7 +8,9 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.text.Html;
 import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.view.Gravity;
@@ -107,5 +109,16 @@ public class BrowserUtil {
         Toast toast = Toast.makeText(context, msg, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
+    }
+
+    @SuppressWarnings("deprecation")
+    public static Spanned fromHtml(String html) {
+        if (html == null) {
+            return new SpannableString("");
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY);
+        } else {
+            return Html.fromHtml(html);
+        }
     }
 }
