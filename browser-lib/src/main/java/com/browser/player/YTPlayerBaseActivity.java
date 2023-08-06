@@ -182,11 +182,15 @@ public abstract class YTPlayerBaseActivity extends AppCompatActivity implements 
         ivVolume.setOnClickListener(view -> applyMute());
         ivVolume2.setOnClickListener(view -> applyMute());
         actionArea.setOnClickListener(view -> {
-            ivPlayPause.performClick();
+            if(!isHiddenControls) {
+                ivPlayPause.performClick();
+            }
             startPanelAutoHide();
         });
         actionArea2.setOnClickListener(view -> {
-            ivPlayPause.performClick();
+            if(!isHiddenControls) {
+                ivPlayPause.performClick();
+            }
             startPanelAutoHide();
         });
     }
@@ -207,13 +211,17 @@ public abstract class YTPlayerBaseActivity extends AppCompatActivity implements 
         startPanelAutoHide();
     }
 
+    private boolean isHiddenControls;
+
     private void startPanelAutoHide() {
+        isHiddenControls = false;
         llControls.setVisibility(View.VISIBLE);
         llControls2.setVisibility(View.VISIBLE);
         getHandler().removeCallbacksAndMessages(null);
         getHandler().postDelayed(() -> {
             llControls.setVisibility(View.GONE);
             llControls2.setVisibility(View.GONE);
+            isHiddenControls = true;
         }, DELAY_TIME);
     }
 
