@@ -1,5 +1,7 @@
 ## Browser
   
+#### Library size is : 2.1MB
+
 ## Setup 
 Add this to your project build.gradle
 ``` gradle
@@ -16,7 +18,7 @@ allprojects {
 [![](https://jitpack.io/v/appsfeature/browser.svg)](https://jitpack.io/#appsfeature/browser)
 ```gradle
 dependencies {
-        implementation 'com.github.appsfeature:browser:3.1'
+        implementation 'com.github.appsfeature:browser:3.3'
 }
 ```
 #### Usage  
