@@ -12,9 +12,6 @@ import com.browser.util.BrowserConstant;
 import com.browser.util.BrowserUtil;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer;
 
-/**
- * @author Created by Abhijit on 25/06/2018.
- */
 public class YTPlayerActivity extends YTPlayerBaseActivity {
 
     protected VideoProperty extraProperty;

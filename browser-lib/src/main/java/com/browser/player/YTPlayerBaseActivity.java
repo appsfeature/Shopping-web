@@ -33,9 +33,6 @@ import java.util.Locale;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
 
-/**
- * @author Created by Abhijit on 25/06/2018.
- */
 public abstract class YTPlayerBaseActivity extends AppCompatActivity implements YTPLayerListener{
 
     private static final long DELAY_TIME = 4000;

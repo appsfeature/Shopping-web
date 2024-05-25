@@ -9,9 +9,6 @@ import android.text.TextUtils;
 
 import com.browser.BrowserSdk;
 
-/**
- * @author Created by Abhijit on 2/6/2018.
- */
 public class YTPlayerUtility {
 
     public static void openYoutubeApp(Activity activity, String videoId) {
