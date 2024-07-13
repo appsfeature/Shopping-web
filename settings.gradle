@@ -17,6 +17,6 @@ dependencyResolutionManagement {
         mavenLocal()
     }
 }
-include ':browser-lib'
 rootProject.name='browser'
+include ':browser-lib'
 include ':app'
