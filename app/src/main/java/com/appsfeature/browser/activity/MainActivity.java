@@ -2,6 +2,7 @@ package com.appsfeature.browser.activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -28,8 +29,8 @@ public class MainActivity extends Activity {
 			@Override
 			public void run() {
 //				BrowserClassUtil.openProfileLink(MainActivity.this, "Live Tv", AppConstant.BASE_URL);
-				BrowserSdk.openVideoPlayer(MainActivity.this, "7PIji8OubXU", "Live Tv");
-//				startActivity(new Intent(SplashScreen.this, BrowserCustomActivity.class));
+//				BrowserSdk.openVideoPlayer(MainActivity.this, "7PIji8OubXU", "Live Tv");
+				startActivity(new Intent(MainActivity.this, BrowserCustomActivity.class));
 				finish();
 			}
 		},SPLASH_TIME_OUT);

@@ -26,9 +26,11 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.browser.BrowserSdk;
 import com.browser.R;
@@ -37,10 +39,11 @@ import com.browser.interfaces.OverrideType;
 import com.browser.util.BrowserFileUtil;
 import com.browser.util.BrowserLogger;
 import com.browser.util.BrowserUtil;
+import com.browser.util.ImageCropHandler;
 import com.browser.views.VideoEnabledWebChromeClient;
 import com.browser.views.VideoEnabledWebView;
-import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageView;
+import com.canhub.cropper.CropImage;
+import com.canhub.cropper.CropImageView;
 
 import java.io.File;
 
@@ -112,6 +115,7 @@ public class BrowserWebView {
     public BrowserWebView init(Activity activity) {
         View rootView = activity.getWindow().getDecorView().getRootView();
         initView(rootView);
+        ImageCropHandler.INSTANCE.init(activity);
         return this;
     }
 
@@ -512,42 +516,8 @@ public class BrowserWebView {
     @MainThread
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == CAMERA_REQUEST_CODE) {
-                Uri imageUri = mfileUri;
-                if (imageUri != null) {
-                    BrowserLogger.info("onActivityResult", "CropImage.getPickImageResultUri(activity, data)", "imageUri:" + imageUri.toString());
-                }
-                // For API >= 23 we need to check specifically that we have permissions to read external storage.
-                if (CropImage.isReadExternalStoragePermissionsRequired(activity, imageUri)) {
-                    // request permissions and handle the result in onRequestPermissionsResult()
-                    mCropImageUri = imageUri;
-                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-                        activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, CropImage.PICK_IMAGE_PERMISSIONS_REQUEST_CODE);
-                    }
-                } else {
-                    // no permissions required or already grunted, can start crop image activity
-                    startCropImageActivity(imageUri, BrowserSdk.getInstance().getCameraCompressQuality());
-                }
-
-            } else if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE) {
-                Uri imageUri = CropImage.getPickImageResultUri(activity, data);
-                if (imageUri != null) {
-                    BrowserLogger.info("onActivityResult", "CropImage.getPickImageResultUri(activity, data)", "imageUri:" + imageUri.toString());
-                }
-                // For API >= 23 we need to check specifically that we have permissions to read external storage.
-                if (CropImage.isReadExternalStoragePermissionsRequired(activity, imageUri)) {
-                    // request permissions and handle the result in onRequestPermissionsResult()
-                    mCropImageUri = imageUri;
-                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-                        activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, CropImage.PICK_IMAGE_PERMISSIONS_REQUEST_CODE);
-                    }
-                } else {
-                    // no permissions required or already grunted, can start crop image activity
-                    startCropImageActivity(imageUri, 90);
-                }
-
-            } else if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
-                Uri fileUri = CropImage.getPickImageResultUri(activity, data);
+            if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
+                Uri fileUri = CropImage.getPickImageResultUriContent(activity, data);
                 if (fileUri != null) {
                     BrowserLogger.info("onActivityResult", "CropImage.getPickImageResultUri(activity, data)", "imageUri:" + fileUri.toString());
                 }
@@ -555,21 +525,12 @@ public class BrowserWebView {
                     mFilePathCallback.onReceiveValue(new Uri[]{fileUri});
                 }
 
-            } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-                CropImage.ActivityResult result = CropImage.getActivityResult(data);
-                mCropImageUri = result.getUri();
-                if (mCropImageUri != null) {
-                    BrowserLogger.info("onActivityResult", "result.getUri()", "mCropImageUri:" + mCropImageUri.toString());
-                }
-//                imagePath = mCropImageUri.getPath();
-//                setImage(mCropImageUri.toString());
-                if (mFilePathCallback != null) {
-                    mFilePathCallback.onReceiveValue(new Uri[]{mCropImageUri});
-                }
             }
         } else {
-            if (mFilePathCallback != null) {
-                mFilePathCallback.onReceiveValue(null);
+            if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
+                if (mFilePathCallback != null) {
+                    mFilePathCallback.onReceiveValue(null);
+                }
             }
             BrowserLogger.e("onActivityResult", "resultCode : Activity.RESULT_CANCELED");
         }
@@ -577,25 +538,25 @@ public class BrowserWebView {
 
     @MainThread
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == CropImage.CAMERA_CAPTURE_PERMISSIONS_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                CropImage.startPickImageActivity(activity);
-                BrowserLogger.info("CropImage.startPickImageActivity(activity);");
-            } else {
-                BrowserSdk.showToast(activity, "Cancelling, required permissions are not granted");
-                BrowserLogger.e("onRequestPermissionsResult()", "Cancelling, required permissions are not granted");
-            }
-        }
-        if (requestCode == CropImage.PICK_IMAGE_PERMISSIONS_REQUEST_CODE) {
-            if (mCropImageUri != null && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // required permissions granted, start crop image activity
-                startCropImageActivity(mCropImageUri, 90);
-                BrowserLogger.info("startCropImageActivity(mCropImageUri)", "mCropImageUri:" + mCropImageUri.toString());
-            } else {
-                BrowserSdk.showToast(activity, "Cancelling, required permissions are not granted");
-                BrowserLogger.e("onRequestPermissionsResult()", "Cancelling, required permissions are not granted");
-            }
-        }
+//        if (requestCode == CropImage.CAMERA_CAPTURE_PERMISSIONS_REQUEST_CODE) {
+//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                CropImage.startPickImageActivity(activity);
+//                BrowserLogger.info("CropImage.startPickImageActivity(activity);");
+//            } else {
+//                BrowserSdk.showToast(activity, "Cancelling, required permissions are not granted");
+//                BrowserLogger.e("onRequestPermissionsResult()", "Cancelling, required permissions are not granted");
+//            }
+//        }
+//        if (requestCode == CropImage.PICK_IMAGE_PERMISSIONS_REQUEST_CODE) {
+//            if (mCropImageUri != null && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                // required permissions granted, start crop image activity
+//                startCropImageActivity(mCropImageUri, 90);
+//                BrowserLogger.info("startCropImageActivity(mCropImageUri)", "mCropImageUri:" + mCropImageUri.toString());
+//            } else {
+//                BrowserSdk.showToast(activity, "Cancelling, required permissions are not granted");
+//                BrowserLogger.e("onRequestPermissionsResult()", "Cancelling, required permissions are not granted");
+//            }
+//        }
     }
 
 
@@ -637,26 +598,46 @@ public class BrowserWebView {
     }
 
     private void openCamera() {
-        try {
-            File file = BrowserFileUtil.getFile(activity, "sampleCamera.png");
-            mfileUri = BrowserFileUtil.getUriFromFile(activity, file);
-            Intent cameraIntent = CropImage.getCameraIntent(activity, mfileUri);
-            cameraIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            activity.startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
-        } catch (Exception e) {
-            e.printStackTrace();
+        int quality = BrowserSdk.getInstance().getCameraCompressQuality();
+        ImageCropHandler.INSTANCE.startCameraWithoutUri(true, false, isFixCropRatio, quality, new ImageCropHandler.Callback() {
+            @Override
+            public void onResult(@Nullable Uri uri) {
+                updateResultOnUI(uri);
+            }
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                updateResultOnUI(null);
+                Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void updateResultOnUI(Uri uri) {
+        if (mFilePathCallback != null) {
+            if (uri != null) {
+                BrowserLogger.info("onActivityResult", "result.getUri()", "mCropImageUri:" + uri);
+                mFilePathCallback.onReceiveValue(new Uri[]{uri});
+            }else {
+                mFilePathCallback.onReceiveValue(null);
+            }
         }
     }
 
     private void openGallery() {
-        try {
-            Intent cameraIntent = CropImage.getPickImageChooserIntent(
-                    activity, activity.getString(R.string.pick_image_intent_chooser_title), false, false);
-            cameraIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            activity.startActivityForResult(cameraIntent, CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        int quality = BrowserSdk.getInstance().getCameraCompressQuality();
+        ImageCropHandler.INSTANCE.startCameraWithoutUri(false, true, isFixCropRatio, quality, new ImageCropHandler.Callback() {
+            @Override
+            public void onResult(@Nullable Uri uri) {
+                updateResultOnUI(uri);
+            }
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                updateResultOnUI(null);
+                Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void openFileChooser() {
@@ -677,36 +658,4 @@ public class BrowserWebView {
         }
     }
 
-    private void openFileChooser2() {
-        try {
-//            Intent fileIntent = CropImage.getPickImageChooserIntent(
-//                    activity, activity.getString(R.string.pick_image_intent_chooser_title), true, false);
-//            fileIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-//            fileIntent.setType("*/*");
-            Intent fileIntent = new Intent(Intent.ACTION_GET_CONTENT);
-            fileIntent.setType("*/*");
-            Intent chooserIntent = Intent.createChooser(fileIntent, "Select File");
-            activity.startActivityForResult(chooserIntent, FILE_CHOOSER_REQUEST_CODE);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private Uri mCropImageUri;
-
-    private void startCropImageActivity(Uri imageUri, int quality) {
-        BrowserLogger.info("startCropImageActivity(Uri imageUri)", "imageUri:" + imageUri.toString());
-        if (isFixCropRatio) {
-            CropImage.activity(imageUri)
-                    .setOutputCompressQuality(quality)
-                    .setAspectRatio(1, 1)
-                    .setGuidelines(CropImageView.Guidelines.ON)
-                    .setCropShape(CropImageView.CropShape.OVAL)
-                    .start(activity);
-        } else {
-            CropImage.activity(imageUri)
-                    .setOutputCompressQuality(quality)
-                    .start(activity);
-        }
-    }
 }

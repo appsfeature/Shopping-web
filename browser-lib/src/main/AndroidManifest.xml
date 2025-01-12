@@ -36,9 +36,14 @@
             android:exported="false"/>
 
         <activity
-            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            android:name="com.canhub.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat"
-            android:exported="true"/>
+            android:exported="true" />
+
+<!--        <activity-->
+<!--            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"-->
+<!--            android:theme="@style/Base.Theme.AppCompat"-->
+<!--            android:exported="true"/>-->
 
         <provider
             android:name="androidx.core.content.FileProvider"
